@@ -1,0 +1,12 @@
+{
+  "type": "code",
+  "name": "RmlUi Examples",
+  "modid": "vsrmluiexample",
+  "version": "1.0.0",
+  "description": "Press Ctrl+F8 to open the RmlUi example window. Includes a HUD and modal dialog.",
+  "authors": ["VSCN-Studio"],
+  "side": "Client",
+  "requiredOnClient": false,
+  "requiredOnServer": false,
+  "dependencies": {"game": "1.22.0", "vsrmlui": "1.0.0"}
+}

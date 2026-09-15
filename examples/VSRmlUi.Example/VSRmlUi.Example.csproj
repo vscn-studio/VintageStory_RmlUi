@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../src/VSRmlUi/VSRmlUi.csproj" Private="false" />
+    <Reference Include="VintagestoryAPI" HintPath="$(GameDirectory)/VintagestoryAPI.dll" Private="false" />
+    <None Include="modinfo.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="assets/**/*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

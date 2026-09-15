@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VSRmlUi/VSRmlUi.csproj" />
+  </Folder>
+  <Folder Name="/examples/">
+    <Project Path="examples/VSRmlUi.Example/VSRmlUi.Example.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VSRmlUi.Tests/VSRmlUi.Tests.csproj" />
+  </Folder>
+</Solution>

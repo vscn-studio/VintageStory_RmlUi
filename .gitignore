@@ -1,0 +1,30 @@
+# Build and packaging output
+/build/
+/artifacts/
+**/bin/
+**/obj/
+__pycache__/
+*.py[cod]
+
+# IDE and local tooling state
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Native build systems
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+compile_commands.json
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+
+# Operating-system files
+.DS_Store
+Thumbs.db

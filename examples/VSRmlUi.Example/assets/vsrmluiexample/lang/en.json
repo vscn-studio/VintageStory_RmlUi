@@ -1,0 +1,11 @@
+{
+  "hotkey": "RmlUi examples",
+  "intro": "RML layout, RCSS styling, C# events. Drag the title to move this window.",
+  "name": "Name", "theme": "Theme", "forest": "Forest", "stone": "Stone", "volume": "Volume",
+  "hud": "Show HUD (keeps game controls)",
+  "textarea": "Edit this text. Copy and paste, Unicode and multiline input are supported.",
+  "ready": "Ready. Try the controls below.", "count": "Count", "modal": "Open modal", "add": "Add a row",
+  "list-intro": "This area scrolls. Added rows can be removed with a click.", "close": "Close",
+  "clicks": "Clicked {0} times", "hello": "Hello, {0}!", "dynamic-row": "A new DOM element. Click to remove.",
+  "modal-title": "Modal dialog", "modal-description": "This dialog captures input. Close it with the button or Esc.", "ok": "Got it"
+}

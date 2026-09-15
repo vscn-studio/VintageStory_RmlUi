@@ -1,0 +1,11 @@
+body { width: 100%; height: 100%; pointer-events: none; }
+#panel { position: absolute; left: 12%; top: 6%; width: 680dp; max-width: 85%; max-height: 90%; overflow: auto; pointer-events: auto; }
+#title { display: block; cursor: move; }
+#title span { font-size: 16dp; }
+.vs-row label { min-width: 95dp; }
+#items { height: 65dp; overflow: auto; background-color: #161c1780; padding: 8dp; }
+#items p { margin: 3dp; cursor: pointer; }
+#status { color: #dac78b; }
+body.stone #panel { background-color: #2d3038f5; border-color: #9499a6; }
+body.stone button { background-color: #515c72; border-color: #929fbd; }
+@media (max-width: 720px) { #panel { left: 3%; max-width: 94%; padding: 14dp; } }

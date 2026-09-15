@@ -1,0 +1,6 @@
+<rml><head><link type="text/rcss" href="vsrmlui:dialog/theme.rcss" />
+<style>
+body { width: 100%; height: 100%; pointer-events: none; }
+#hud { position: absolute; right: 24dp; top: 24dp; padding: 14dp 20dp; background-color: #1b261bdf; border: 1dp #7a8b61; border-radius: 6dp; }
+#hud-count { color: #e1c97e; font-size: 24dp; }
+</style></head><body><div id="hud">RmlUi HUD <span id="hud-count">0</span></div></body></rml>

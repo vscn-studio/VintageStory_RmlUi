@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NativeRid Condition="'$(NativeRid)' == ''">$(NETCoreSdkRuntimeIdentifier)</NativeRid>
+    <NativeBuildDirectory Condition="'$(NativeBuildDirectory)' == ''">$(MSBuildThisFileDirectory)../../build/native/$(NativeRid)</NativeBuildDirectory>
+    <GameNativeDirectory Condition="'$(GameNativeDirectory)' == ''">$(GameDirectory)/Lib</GameNativeDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/VSRmlUi/VSRmlUi.csproj" />
+    <Reference Include="VintagestoryAPI" HintPath="$(GameDirectory)/VintagestoryAPI.dll" />
+    <Reference Include="SkiaSharp" HintPath="$(GameDirectory)/Lib/SkiaSharp.dll" />
+    <Reference Include="$(GameDirectory)/Lib/OpenTK*.dll" />
+    <None Include="$(GameNativeDirectory)/glfw3*.dll;$(GameNativeDirectory)/libglfw*.so*;$(GameNativeDirectory)/libglfw*.dylib;$(GameNativeDirectory)/libSkiaSharp*.dll;$(GameNativeDirectory)/libSkiaSharp*.so;$(GameNativeDirectory)/libSkiaSharp*.dylib" CopyToOutputDirectory="PreserveNewest" Link="%(Filename)%(Extension)" />
+    <None Include="$(NativeBuildDirectory)/out/Release/*vsrmlui_native*" CopyToOutputDirectory="PreserveNewest" Link="native/$(NativeRid)/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

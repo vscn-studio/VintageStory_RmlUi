@@ -1,0 +1,11 @@
+{
+  "hotkey": "RmlUi 示例界面",
+  "intro": "RML 布局、RCSS 样式、C# 事件。拖动标题可以移动窗口。",
+  "name": "名称", "theme": "主题", "forest": "森林", "stone": "岩石", "volume": "音量",
+  "hud": "显示 HUD（保留游戏操作）",
+  "textarea": "可以编辑这段文本，支持复制粘贴、Unicode 和多行输入。",
+  "ready": "已就绪，试试下面的控件。", "count": "计数", "modal": "打开弹窗", "add": "添加一行",
+  "list-intro": "此区域可以滚动，点击新增的行可以移除它。", "close": "关闭",
+  "clicks": "已点击 {0} 次", "hello": "你好，{0}！", "dynamic-row": "这是新添加的元素，点击可以移除。",
+  "modal-title": "模态弹窗", "modal-description": "此窗口会接管输入，可以点击按钮或按 Esc 关闭。", "ok": "知道了"
+}

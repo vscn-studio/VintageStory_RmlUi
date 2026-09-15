@@ -1,0 +1,39 @@
+/* Optional shared theme. Use dp for sizes that follow the Vintage Story GUI scale. */
+body { font-family: vsrmlui-default; font-size: 16dp; color: #e9e2d5; }
+div, p, h1, h2, form { display: block; }
+p { margin: 10dp 0; line-height: 1.5; }
+h1 { font-size: 26dp; font-weight: bold; margin: 0 0 12dp; }
+h2 { font-size: 18dp; font-weight: bold; margin: 14dp 0 8dp; }
+strong { font-weight: bold; }
+em { font-style: italic; }
+.vs-window { background-color: #242824f5; border: 1dp #777965; border-radius: 8dp; padding: 24dp; box-sizing: border-box; }
+.vs-muted { color: #a8b09e; }
+.vs-row { display: flex; align-items: center; margin: 8dp 0; }
+.vs-row > * { margin-right: 12dp; }
+button, input, select, textarea { display: inline-block; font-size: 16dp; color: #e9e2d5; }
+button { tab-index: auto; }
+button, input.button { display: inline-block; padding: 9dp 16dp; background-color: #435540; border: 1dp #758967; border-radius: 4dp; cursor: pointer; text-align: center; }
+button:hover, input.button:hover { background-color: #576d4e; }
+button:active, input.button:active { background-color: #334130; }
+button:focus, input:focus, select:focus, textarea:focus { border-color: #c8b978; }
+button:disabled { background-color: #353b33; color: #777e70; }
+input.text, textarea, select { padding: 8dp; background-color: #171d18; border: 1dp #65745d; border-radius: 3dp; }
+input.text { width: 220dp; height: 24dp; cursor: text; }
+textarea { display: block; width: 94%; height: 76dp; cursor: text; }
+selection { background-color: #667c53; color: #fff; }
+input.checkbox { width: 20dp; height: 20dp; background-color: #171d18; border: 2dp #829171; border-radius: 3dp; cursor: pointer; }
+input.checkbox:checked { background-color: #c8b978; border-color: #eae0b7; }
+select { width: 180dp; height: 24dp; }
+select selectarrow { width: 20dp; background-color: #526349; }
+select selectbox { background-color: #202a20; border: 1dp #8b987a; padding: 4dp; }
+select option { display: block; padding: 7dp; }
+select option:hover, select option:checked { background-color: #526349; }
+input.range { width: 210dp; height: 24dp; }
+input.range slidertrack { height: 6dp; margin-top: 9dp; background-color: #68755b; }
+input.range sliderbar { width: 16dp; height: 24dp; background-color: #d0be7b; border-radius: 3dp; }
+input.range sliderarrowdec, input.range sliderarrowinc { display: none; }
+scrollbarvertical { width: 10dp; }
+scrollbarhorizontal { height: 10dp; }
+scrollbarvertical slidertrack, scrollbarhorizontal slidertrack { background-color: #182019; }
+scrollbarvertical sliderbar, scrollbarhorizontal sliderbar { min-height: 20dp; min-width: 10dp; background-color: #687b5f; border-radius: 3dp; }
+scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc, scrollbarhorizontal sliderarrowdec, scrollbarhorizontal sliderarrowinc { display: none; }

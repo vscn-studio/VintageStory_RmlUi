@@ -1,0 +1,12 @@
+{
+  "type": "code",
+  "name": "RmlUi",
+  "modid": "vsrmlui",
+  "version": "1.0.0",
+  "description": "RmlUi interface framework for Vintage Story mods. Provides RML/RCSS documents and a managed C# API.",
+  "authors": ["VSCN-Studio"],
+  "side": "Universal",
+  "requiredOnClient": false,
+  "requiredOnServer": false,
+  "dependencies": {"game": "1.22.0"}
+}

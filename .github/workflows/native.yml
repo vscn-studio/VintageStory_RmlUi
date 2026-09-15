@@ -1,0 +1,87 @@
+name: Native platforms
+on:
+  push:
+    paths: ['native/**', 'tests/native_smoke.py', 'build.py', '.github/workflows/native.yml']
+  pull_request:
+    paths: ['native/**', 'tests/native_smoke.py', 'build.py', '.github/workflows/native.yml']
+  workflow_dispatch:
+    inputs:
+      package_release:
+        description: 'Build the single 1.0.0 release ZIP on a configured self-hosted Windows runner (VS_GAME_DIRECTORY required)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: windows-2022, rid: win-x64 }
+          - { runner: ubuntu-22.04, rid: linux-x64 }
+          - { runner: ubuntu-24.04-arm, rid: linux-arm64 }
+          - { runner: macos-15-intel, rid: osx-x64 }
+          - { runner: macos-15, rid: osx-arm64 }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: mikke89/RmlUi
+          ref: 3045e6e3510425ef2870f7647b3f59d3ae9970f5
+          path: upstream/RmlUi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Consistent CMake and Ninja versions
+        run: python -m pip install "cmake>=3.24,<4" ninja
+      - name: Linux build tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y g++
+      - name: Build and check native ABI (no game files needed)
+        run: python build.py --native-only --rid ${{ matrix.rid }} --rmlui-source upstream/RmlUi
+      - name: Linux dependency report
+        if: runner.os == 'Linux'
+        run: ldd artifacts/native/${{ matrix.rid }}/libvsrmlui_native.so
+      - name: macOS architecture and dependency report
+        if: runner.os == 'macOS'
+        run: |
+          lipo -info artifacts/native/${{ matrix.rid }}/libvsrmlui_native.dylib
+          otool -L artifacts/native/${{ matrix.rid }}/libvsrmlui_native.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.rid }}
+          path: artifacts/native/
+          if-no-files-found: error
+  package:
+    if: github.event_name == 'workflow_dispatch' && inputs.package_release
+    needs: native
+    # Game assemblies are not redistributed in this repository. Configure this
+    # runner with Python, .NET 10, CMake, MSVC and VS_GAME_DIRECTORY before opting in.
+    runs-on: [self-hosted, Windows, X64, vsrmlui-packaging]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: mikke89/RmlUi
+          ref: 3045e6e3510425ef2870f7647b3f59d3ae9970f5
+          path: upstream/RmlUi
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: collected-native
+          merge-multiple: true
+      - name: Build managed SDK and check integration
+        shell: pwsh
+        run: |
+          if (-not $env:VS_GAME_DIRECTORY) { throw 'Set VS_GAME_DIRECTORY on this runner.' }
+          ./build.ps1 -PrepareOnly -HeadlessTests -GameDirectory $env:VS_GAME_DIRECTORY -RmlUiSource upstream/RmlUi
+      - name: Create the only release ZIP
+        shell: pwsh
+        run: ./build.ps1 -PackageOnly -BundleNative collected-native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsrmlui-1.0.0-release
+          path: artifacts/vsrmlui_1.0.0_multi.zip
+          if-no-files-found: error
