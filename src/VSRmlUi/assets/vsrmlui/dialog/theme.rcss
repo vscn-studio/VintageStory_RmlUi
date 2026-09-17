@@ -32,6 +32,10 @@ input.range { width: 210dp; height: 24dp; }
 input.range slidertrack { height: 6dp; margin-top: 9dp; background-color: #68755b; }
 input.range sliderbar { width: 16dp; height: 24dp; background-color: #d0be7b; border-radius: 3dp; }
 input.range sliderarrowdec, input.range sliderarrowinc { display: none; }
+.color-picker { display: flex; align-items: center; }
+.color-swatch { width: 28dp; height: 28dp; margin-right: 6dp; border: 1dp #65745d; border-radius: 4dp; }
+.color-value, .time-picker { min-width: 120dp; }
+input.time-picker { width: 130dp; }
 scrollbarvertical { width: 10dp; }
 scrollbarhorizontal { height: 10dp; }
 scrollbarvertical slidertrack, scrollbarhorizontal slidertrack { background-color: #182019; }

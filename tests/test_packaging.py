@@ -50,8 +50,15 @@ class PackagingTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             build.package_merged(self.root / "artifacts/native")
 
+    def add_example(self):
+        staged = self.root / "artifacts/example"
+        staged.mkdir(parents=True)
+        (staged / "VSRmlUi.Example.dll").write_bytes(b"synthetic test mod")
+        self.write_json(staged / "modinfo.json", {"modid": "vsrmluiexample", "version": "1.0.0"})
+        (staged / "assets/vsrmluiexample/dialog/input-test.rml").parent.mkdir(parents=True)
+        (staged / "assets/vsrmluiexample/dialog/input-test.rml").write_text("<rml />", encoding="utf-8")
+
     def test_single_complete_archive_only(self):
-        self.add_native("linux-arm64")
         self.add_native("osx-x64")
         self.add_native("osx-arm64")
         self.package()
@@ -60,7 +67,7 @@ class PackagingTests(unittest.TestCase):
         with zipfile.ZipFile(archives[0]) as z:
             self.assertIsNone(z.testzip())
             self.assertEqual(json.loads(z.read("modinfo.json"))["version"], "1.0.0")
-            self.assertEqual(set(z.namelist()), {"VSRmlUi.dll", "modinfo.json", "LICENSE", "licenses/MIT", "assets/test.txt", "native/win-x64/vsrmlui_native.dll", "native/linux-x64/libvsrmlui_native.so", "native/linux-arm64/libvsrmlui_native.so", "native/osx-x64/libvsrmlui_native.dylib", "native/osx-arm64/libvsrmlui_native.dylib"})
+            self.assertEqual(set(z.namelist()), {"VSRmlUi.dll", "modinfo.json", "LICENSE", "licenses/MIT", "assets/test.txt", "native/win-x64/vsrmlui_native.dll", "native/linux-x64/libvsrmlui_native.so", "native/osx-x64/libvsrmlui_native.dylib", "native/osx-arm64/libvsrmlui_native.dylib"})
 
     def test_missing_linux_refuses_partial_archive(self):
         (self.root / "artifacts/native/linux-x64/libvsrmlui_native.so").unlink()
@@ -92,6 +99,13 @@ class PackagingTests(unittest.TestCase):
         with zipfile.ZipFile(self.root / "artifacts/vsrmlui_1.0.0.zip") as z:
             self.assertIn("native/win-x64/vsrmlui_native.dll", z.namelist())
             self.assertIn("native/linux-x64/libvsrmlui_native.so", z.namelist())
+
+    def test_input_diagnostics_archive_is_separate(self):
+        self.add_example()
+        self.package()
+        self.assertEqual(sorted(p.name for p in (self.root / "artifacts").glob("*.zip")), ["vsrmlui-test_1.0.0.zip", "vsrmlui_1.0.0.zip"])
+        with zipfile.ZipFile(self.root / "artifacts/vsrmlui-test_1.0.0.zip") as z:
+            self.assertEqual(set(z.namelist()), {"VSRmlUi.Example.dll", "modinfo.json", "LICENSE", "assets/vsrmluiexample/dialog/input-test.rml"})
 
 
 if __name__ == "__main__":

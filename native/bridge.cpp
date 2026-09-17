@@ -4,6 +4,7 @@
 #include "bridge.h"
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Elements/ElementFormControl.h>
+#include <RmlUi/Core/Elements/ElementFormControlSelect.h>
 #include "RmlUi_Include_GL3.h"
 #include "RmlUi_Renderer_GL3.h"
 #include <algorithm>
@@ -191,7 +192,7 @@ struct Listener : EventListener {
         if (auto control = dynamic_cast<ElementFormControl*>(event_target)) value = control->GetValue();
         events.push_back({{id, document, remember(found->second, event_target)}, e.GetType(), value, event_target->GetId(),
             std::to_string(e.GetParameter<int>("mouse_x", 0)), std::to_string(e.GetParameter<int>("mouse_y", 0)),
-            std::to_string(e.GetParameter<int>("button", -1)), std::to_string(e.GetParameter<float>("wheel_delta", 0)),
+            std::to_string(e.GetParameter<int>("button", -1)), std::to_string(e.GetParameter<float>("wheel_delta_y", e.GetParameter<float>("wheel_delta", 0))),
             std::to_string((e.GetParameter<bool>("ctrl_key", false) ? 1 : 0) | (e.GetParameter<bool>("shift_key", false) ? 2 : 0) | (e.GetParameter<bool>("alt_key", false) ? 4 : 0) | (e.GetParameter<bool>("meta_key", false) ? 8 : 0)),
             std::to_string(static_cast<int>(e.GetParameter<Input::KeyIdentifier>("key_identifier", Input::KI_UNKNOWN)))});
     }
@@ -292,7 +293,9 @@ uint64_t VR_CALL vr_element(uint64_t id, uint64_t handle, int op, const char* na
         switch (op) {
         case 0: return remember(d, e->GetElementById(n));
         case 1: return remember(d, e->QuerySelector(n));
-        case 2: e->SetInnerRML(v); break;
+        case 2:
+            if (auto* select = dynamic_cast<ElementFormControlSelect*>(e)) select->RemoveAll();
+            e->SetInnerRML(v); break;
         case 3: e->SetAttribute(n, v); break;
         case 4: e->RemoveAttribute(n); break;
         case 5: if (!e->SetProperty(n, v)) throw std::runtime_error("Invalid RCSS property or value."); break;
@@ -306,6 +309,7 @@ uint64_t VR_CALL vr_element(uint64_t id, uint64_t handle, int op, const char* na
         case 13: if (e == d.root || !e->GetParentNode()) throw std::runtime_error("Cannot remove a document root."); e->GetParentNode()->RemoveChild(e); break;
         case 14: { Dictionary params; params["value"] = v; e->DispatchEvent(n, params); break; }
         case 15: e->SetInnerRML(""); e->AppendChild(d.root->CreateTextNode(v)); break;
+        case 16: d.context->Update(); e->SetScrollLeft(std::stof(n)); e->SetScrollTop(std::stof(v)); break;
         default: throw std::runtime_error("Unknown element operation.");
         }
         return 1;

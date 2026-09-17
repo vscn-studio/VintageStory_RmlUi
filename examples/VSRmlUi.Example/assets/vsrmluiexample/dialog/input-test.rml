@@ -1,0 +1,32 @@
+<rml>
+<head>
+  <title>RmlUi input diagnostics</title>
+  <link type="text/rcss" href="vsrmlui:dialog/theme.rcss" />
+  <link type="text/rcss" href="input-test.rcss" />
+</head>
+<body>
+  <div id="panel" class="vs-window">
+    <handle move_target="panel" id="title"><h1>RmlUi input diagnostics</h1></handle>
+    <p class="vs-muted">F9 toggles this window. Try Chinese/Japanese IME composition, AltGr, emoji, paste, and Command/Ctrl shortcuts.</p>
+    <p class="hint">Committed characters should appear in the fields even when Ctrl or Alt is held. Composition previews and candidate-window placement are not implemented yet.</p>
+
+    <div class="fields">
+      <div class="field"><label for="single">Single line</label><input id="single" class="text" type="text" value="中文 / English" /></div>
+      <div class="field"><label for="number">Number</label><input id="number" class="text small" type="number" value="42" /></div>
+      <div class="field"><label for="choice">Select</label><select id="choice"><option value="ime">IME / text</option><option value="keyboard">Keyboard</option><option value="mouse">Mouse</option></select></div>
+      <div class="field"><label for="check">Checkbox</label><input id="check" class="checkbox" type="checkbox" checked="checked" /></div>
+      <div class="field"><label for="range">Range</label><input id="range" class="range" type="range" min="0" max="100" step="1" value="50" /></div>
+    </div>
+
+    <label for="multiline">Multiline text</label>
+    <textarea id="multiline">Paste or compose text here…</textarea>
+    <div class="actions">
+      <button id="reset">Reset controls</button>
+      <button id="clear-log">Clear event log</button>
+      <button id="close">Close</button>
+    </div>
+    <p id="status">Ready. Type text, use an IME, and try the editing shortcuts.</p>
+    <pre id="event-log">(events will appear here)</pre>
+  </div>
+</body>
+</rml>

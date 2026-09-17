@@ -4,7 +4,7 @@
 
 `VSRmlUi` is a client-side UI foundation for [Vintage Story](https://www.vintagestory.at/). It exposes RmlUi documents through a small C# API, so mods can build windows, modal dialogs, and HUDs with RML and RCSS.
 
-The current release is **1.0.0**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The repository currently contains Windows and Linux native artifacts; macOS binaries must be built separately.
+The current release is **1.0.0**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The current merged bundle includes four native-smoke-tested RIDs: `win-x64`, `linux-x64`, `osx-x64`, and `osx-arm64`. The official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
 
 ## Features
 
@@ -43,6 +43,8 @@ page.Show();
 
 All UI operations must run on the client thread. Use `api.Event.EnqueueMainThreadTask` when a background task needs to update a document. See the Chinese README and `examples/` for the complete API and resource layout.
 
+`RmlControls.ColorPicker` and `BindColorPicker` provide an inline swatch and hex field. Clicking the swatch opens a classic dark color dialog built entirely in RmlUi: 48 basic colors, 16 custom slots, draggable hue/saturation spectrum and luminance strip, synchronized RGB/HSL/HEX fields, alpha slider, and original/new previews. OK commits the draft; Cancel or Escape discards it. Custom slots are saved separately in `ModConfig/vsrmlui-colors.json`. Pass `allowAlpha: false` for RGB-only fields, or use `RmlColorDialog.Show(parent, hex, accepted, allowAlpha)` directly. The optional `dialogOpened` callback exposes the child document for host window-stack integration. No Windows native dialog is invoked.
+
 ## Building
 
 Requirements: Python 3.10+, .NET 10 SDK, CMake 3.24+, and a native toolchain. The build expects a local Vintage Story installation and a checkout of the pinned RmlUi source revision.
@@ -58,6 +60,8 @@ Linux or macOS:
 ```sh
 python3 build.py --game-directory /path/to/game --rmlui-source /path/to/RmlUi
 ```
+
+The build creates `artifacts/vsrmlui_1.0.0.zip` after all native libraries are available. A successful example build also creates `artifacts/vsrmlui-test_1.0.0.zip`. Install the main mod and then the test mod; press **Ctrl+F9** (use the modifier shown by the game on macOS) in the client to open the input diagnostics window. It includes single-line and multiline text, number/select/checkbox/range controls, and an event log for IME committed text, AltGr, emoji, paste, and editing shortcuts.
 
 The scripts build the native bridge, managed mod, example, tests, and SDK. Packaging produces `artifacts/vsrmlui_1.0.0.zip` only when all required native libraries are available. Platform-specific CI and bundling details are documented in `PLATFORMS.zh-CN.md`.
 

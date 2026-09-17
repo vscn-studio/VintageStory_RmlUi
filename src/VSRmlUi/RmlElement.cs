@@ -32,6 +32,12 @@ public sealed class RmlElement
     public void SetClass(string name, bool enabled) => Apply(8, name, enabled ? "1" : "0");
     public void Focus() => Apply(10);
     public void Blur() => Apply(11);
+    /// <summary>Restores the scroll offset in context pixels after resolving layout. Values are clamped to the scrollable area.</summary>
+    public void SetScrollOffset(float x, float y)
+    {
+        if (!float.IsFinite(x) || !float.IsFinite(y)) throw new ArgumentOutOfRangeException(nameof(x));
+        Apply(16, x.ToString(System.Globalization.CultureInfo.InvariantCulture), y.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
     public RmlElement AppendChild(string tag) => new(Document, Apply(12, tag));
     public void Remove() => Apply(13);
     public RmlElement? GetElementById(string id) => Find(0, id);

@@ -1,0 +1,54 @@
+body { width: 100%; height: 100%; margin: 0dp; display: flex; align-items: center; justify-content: center; font-family: vsrmlui-default; font-size: 15dp; line-height: 24dp; color: #eeeeee; background-color: #00000055; }
+div { display: block; }
+#color-dialog { width: 760dp; max-width: 96%; height: 640dp; max-height: 94%; display: flex; flex-direction: column; background-color: #242424; border: 1dp #555555; border-radius: 8dp; }
+.color-header { height: 48dp; flex-shrink: 0; line-height: 48dp; text-align: center; font-size: 20dp; font-weight: bold; }
+.color-content { display: flex; flex-wrap: wrap; flex: 1; min-height: 0dp; padding: 8dp 18dp 16dp; overflow-y: auto; }
+.palette-column { flex: 1; min-width: 245dp; margin: 0dp 14dp 16dp 0dp; }
+.editor-column { flex: 1; min-width: 280dp; margin: 0dp 0dp 16dp 0dp; }
+.caption { margin-bottom: 8dp; }
+.palette { display: flex; flex-wrap: wrap; }
+.swatch-cell { width: 12.5%; box-sizing: border-box; padding: 3dp; height: 32dp; }
+button, input { box-sizing: border-box; height: 38dp; font-family: vsrmlui-default; font-size: 15dp; line-height: 24dp; color: #eeeeee; background-color: #303030; border: 1dp #52545a; border-radius: 4dp; padding: 6dp 10dp; tab-index: auto; }
+button { display: inline-block; text-align: center; cursor: pointer; border-width: 0dp; padding: 7dp 12dp; white-space: nowrap; }
+button:hover, button:focus { background-color: #414141; }
+button:active { background-color: #585858; }
+input:focus { background-color: #383838; }
+button.palette-swatch { display: block; width: 100%; height: 26dp; padding: 0dp; border-radius: 4dp; }
+.palette-swatch:hover, .palette-swatch:focus { opacity: 0.75; }
+.current-slot { decorator: horizontal-gradient(#ffffff44 #ffffff44); }
+.custom-title { margin-top: 14dp; }
+#add-custom { display: block; width: 100%; margin-top: 10dp; }
+.previews { display: flex; margin-top: 14dp; }
+.preview-item { flex: 1; margin-right: 10dp; }
+.preview { position: relative; height: 48dp; }
+.checker { position: absolute; width: 12.5%; height: 25%; }
+.preview-color { position: absolute; top: 0dp; bottom: 0dp; left: 0dp; right: 0dp; }
+.spectrum-row { display: flex; height: 192dp; margin-bottom: 12dp; }
+#spectrum { position: relative; flex: 1; height: 100%; cursor: crosshair; }
+.hue-strip { position: absolute; top: 0dp; bottom: 0dp; width: 16.667%; pointer-events: none; }
+.saturation-overlay { position: absolute; width: 100%; height: 100%; decorator: vertical-gradient(#80808000 #808080ff); pointer-events: none; }
+#crosshair { position: absolute; width: 10dp; height: 10dp; margin-left: -6dp; margin-top: -6dp; border: 1dp #111111; border-radius: 6dp; pointer-events: none; }
+.cross-inner { width: 8dp; height: 8dp; border: 1dp #ffffff; border-radius: 5dp; pointer-events: none; }
+#luminance { position: relative; width: 24dp; height: 100%; margin-left: 16dp; margin-right: 5dp; cursor: crosshair; }
+#light-top, #light-bottom { position: absolute; left: 0dp; right: 0dp; height: 50%; pointer-events: none; }
+#light-top { top: 0dp; }
+#light-bottom { top: 50%; }
+#light-marker { position: absolute; left: -4dp; right: -4dp; height: 3dp; margin-top: -2dp; border: 1dp #111111; background-color: #ffffff; pointer-events: none; }
+.components { display: flex; margin-bottom: 10dp; }
+.component { flex: 1; min-width: 0dp; margin-right: 8dp; }
+.component:last-child { margin-right: 0dp; }
+.component label { display: block; font-size: 13dp; }
+.component input { display: block; width: 100%; }
+.hex-row, .alpha-row { display: flex; align-items: center; margin-top: 10dp; }
+.hex-row label, .alpha-row label { width: 62dp; flex-shrink: 0; }
+.hex-row input, .alpha-row input { flex: 1; min-width: 0dp; }
+.color-footer { display: flex; align-items: center; flex-shrink: 0; height: 64dp; box-sizing: border-box; padding: 12dp 18dp; border-top: 1dp #414141; }
+#message { flex: 1; min-width: 0dp; font-size: 13dp; color: #ff9da8; }
+.color-footer button { min-width: 80dp; margin-left: 8dp; }
+button.primary { background-color: #365f9b; }
+button.primary:hover, button.primary:focus { background-color: #4575b9; }
+button.primary:active { background-color: #598ed4; }
+button[disabled], button[disabled]:hover, button[disabled]:focus { background-color: #303030; color: #777777; cursor: default; }
+scrollbarvertical { width: 10dp; }
+scrollbarvertical slidertrack { background-color: #292929; }
+scrollbarvertical sliderbar { background-color: #666666; min-height: 24dp; border-radius: 4dp; }

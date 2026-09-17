@@ -1,0 +1,15 @@
+{
+  "color-title": "颜色",
+  "color-basic": "基本颜色",
+  "color-custom": "自定义颜色",
+  "color-add": "添加到自定义颜色",
+  "color-spectrum": "颜色谱",
+  "color-lightness": "亮度",
+  "color-old": "原颜色",
+  "color-new": "新颜色",
+  "color-alpha": "透明度",
+  "color-ok": "确定",
+  "color-cancel": "取消",
+  "color-invalid": "请输入有效的颜色值。",
+  "color-save-failed": "无法保存自定义颜色。"
+}

@@ -33,17 +33,21 @@ internal static class GameIntegrationChecks
         });
         var api = Proxy<ICoreClientAPI>((method, _) => method.Name switch { "get_Gui" => gui, "get_Input" => input, "get_Logger" => logger, _ => Default(method.ReturnType) });
         var host = new GameHost(api);
-        ui.CreateView = document => new GameDialog(api, host, document);
+        bool numLock = false;
+        ui.CreateView = document => new GameDialog(api, host, document, () => numLock ? 32 : 0);
         try
         {
             using var window = ui.LoadDocumentFromString("gamechecks", "<rml><body><input id='entry' class='text' type='text' /></body></rml>", "gamechecks:dialog/window.rml");
             var view = (GameDialog)window.View!;
+            check(view.InputOrder == 0.5, "default document preserves native dialog input priority");
             window.Show();
             check(view.Focused && view.PrefersUngrabbedMouse && view.CaptureAllInputs(), "game window owns focus and unlocks cursor");
             window.GetElementById("entry")!.Focus(); window.Call(3, 800, 600, 1); window.Call(4);
             var typing = new KeyEvent { KeyChar = '中' }; view.OnKeyPress(typing);
             view.OnKeyPress(new KeyEvent { KeyChar = '\ud83d' }); view.OnKeyPress(new KeyEvent { KeyChar = '\ude42' });
             check(typing.Handled && window.GetElementById("entry")!.Value.Contains("中🙂"), "game text events preserve Chinese and surrogate pairs");
+            var imeCommitted = new KeyEvent { KeyChar = '界', CtrlPressed = true }; view.OnKeyPress(imeCommitted);
+            check(imeCommitted.Handled && window.GetElementById("entry")!.Value.EndsWith("🙂界"), "committed IME text is not dropped with modifiers");
             view.OnKeyPress(new KeyEvent { KeyChar = '@', CtrlPressed = true, AltPressed = true });
             check(window.GetElementById("entry")!.Value.EndsWith("@"), "AltGr committed text reaches the control");
             var commandA = new KeyEvent { KeyCode = (int)GlKeys.A, CommandPressed = true };
@@ -51,6 +55,49 @@ internal static class GameIntegrationChecks
             window.Call(11, text: "replacement");
             check(window.GetElementById("entry")!.Value == "replacement", "macOS Command+A selects all through the native text widget");
             check((KeyMap.Modifiers(commandA, macOS: false) & 1) == 0, "Windows Meta does not become Control");
+            check(KeyboardLocks.ReadWindowsModifiers(key => key == 0x90 ? (short)1 : (short)0) == 32,
+                "Windows Num Lock toggle maps to RmlUi KM_NUMLOCK");
+            check(KeyboardLocks.ReadWindowsModifiers(_ => unchecked((short)0x8000)) == 0,
+                "holding a lock key does not substitute for its toggle state");
+            var entry = window.GetElementById("entry")!;
+            void Key(GlKeys key)
+            {
+                view.OnKeyDown(new KeyEvent { KeyCode = (int)key });
+                view.OnKeyUp(new KeyEvent { KeyCode = (int)key });
+            }
+            void Middle()
+            {
+                entry.Value = "1234"; entry.Focus(); window.Call(3, 800, 600, 1);
+                Key(GlKeys.Home); Key(GlKeys.Right); Key(GlKeys.Right);
+            }
+            numLock = true;
+            for (int digit = 0; digit <= 9; digit++)
+            {
+                Middle();
+                Key(GlKeys.Keypad0 + digit); view.OnKeyPress(new KeyEvent { KeyChar = (char)('0' + digit) });
+                check(entry.Value == "12" + digit + "34", $"Num Lock on: keypad {digit} inserts at the existing caret");
+            }
+            Middle(); Key(GlKeys.KeypadDecimal); view.OnKeyPress(new KeyEvent { KeyChar = '.' });
+            check(entry.Value == "12.34", "keypad decimal inserts without deleting the following digit");
+            Middle();
+            foreach (int digit in new[] { 7, 1, 4, 6 })
+            {
+                Key(GlKeys.Keypad0 + digit); view.OnKeyPress(new KeyEvent { KeyChar = (char)('0' + digit) });
+                window.Call(3, 800, 600, 1);
+            }
+            check(entry.Value == "12714634", "consecutive keypad digits preserve insertion order and caret position");
+            numLock = false;
+            foreach (var pair in new[] { (GlKeys.Keypad7, "X1234"), (GlKeys.Keypad1, "1234X"), (GlKeys.Keypad4, "1X234"), (GlKeys.Keypad6, "123X4") })
+            {
+                Middle(); Key(pair.Item1); view.OnKeyPress(new KeyEvent { KeyChar = 'X' });
+                check(entry.Value == pair.Item2, $"Num Lock off: {pair.Item1} retains navigation");
+            }
+            Middle(); Key(GlKeys.KeypadDecimal);
+            check(entry.Value == "124", "Num Lock off: keypad decimal retains Delete");
+            Middle(); Key(GlKeys.Number7); view.OnKeyPress(new KeyEvent { KeyChar = '7' });
+            check(entry.Value == "12734", "top-row digits are independent of Num Lock");
+            view.UnFocus(); numLock = true; view.Focus(); Middle(); Key(GlKeys.Keypad7); view.OnKeyPress(new KeyEvent { KeyChar = '7' });
+            check(entry.Value == "12734", "lock changes while unfocused are respected without reopening the document");
             using var hud = ui.LoadDocumentFromString("gamechecks", "<rml><body>HUD</body></rml>", "gamechecks:dialog/hud.rml", new() { Mode = RmlWindowMode.Hud });
             hud.Show(); var hudView = (GameDialog)hud.View!;
             check(!hudView.Focused && !hudView.PrefersUngrabbedMouse && !hudView.CaptureAllInputs() && !hudView.ShouldReceiveMouseEvents(), "HUD does not capture focus, cursor or game input");
@@ -58,15 +105,46 @@ internal static class GameIntegrationChecks
             using (RmlRenderScope.Enter(RmlDrawTarget.Offscreen))
                 check(!view.ShouldReceiveRenderEvents() && !hudView.ShouldReceiveRenderEvents(), "screen windows and HUDs are excluded from offscreen passes");
             check(hudView.ShouldReceiveRenderEvents(), "screen drawing resumes after offscreen scope");
+            foreach (var mode in new[] { RmlWindowMode.Window, RmlWindowMode.Modal })
+            {
+                using var passive = ui.LoadDocumentFromString("gamechecks", "<rml><body>Visible panel</body></rml>", "gamechecks:dialog/passive.rml", new() { Mode = mode });
+                passive.Show(); var passiveView = (GameDialog)passive.View!;
+                passiveView.UnFocus();
+                passive.Options.Input.ReceiveMouse = false;
+                passive.Options.Input.ReceiveKeyboard = false;
+                check(passiveView.DialogType == EnumDialogType.HUD && !passiveView.Focusable && !passiveView.DisableMouseGrab
+                    && !passiveView.PrefersUngrabbedMouse && !passiveView.CaptureRawMouse() && !passiveView.CaptureAllInputs(),
+                    $"disabled {mode} panel becomes HUD and does not block mouse capture");
+                check(passive.IsVisible && passiveView.ShouldReceiveRenderEvents() && !passiveView.OnEscapePressed(),
+                    $"passive {mode} panel still renders and does not intercept Escape");
+                passive.Options.Input.ReceiveKeyboard = true;
+                check(passiveView.DialogType == EnumDialogType.Dialog && passiveView.Focusable,
+                    $"keyboard-only {mode} panel remains an interactive dialog");
+                passive.Options.Input.ReceiveKeyboard = false;
+                passive.Options.Input.ReceiveMouse = true;
+                check(passiveView.DialogType == EnumDialogType.Dialog && passiveView.ShouldReceiveMouseEvents()
+                    && passiveView.DisableMouseGrab == (mode == RmlWindowMode.Modal),
+                    $"reenabling {mode} restores interaction and original modality");
+            }
+            window.Show();
             window.InputFilter = input => input.Kind == RmlInputKind.MouseDown;
             var filtered = new MouseEvent(799, 599, EnumMouseButton.Left, 0); view.OnMouseDown(filtered);
             check(filtered.Handled, "synchronous input filter prevents game fallthrough");
             window.InputFilter = null;
             check(ui.TryGetDocument(view, out var found) && found == window && window.Host == view, "host document lookup works both ways");
+            using (var overlay = ui.LoadDocumentFromString("gamechecks", "<rml><body/></rml>", "gamechecks:dialog/pause.rml", new() { InputOrder = -0.1, DrawOrder = 0.99 }))
+                check(((GameDialog)overlay.View!).InputOrder < 0 && ((GameDialog)overlay.View!).DrawOrder > 0.89, "pause overlay receives input before and renders above the native menu");
 
             using var modal = ui.LoadDocumentFromString("gamechecks", "<rml><body>Modal</body></rml>", "gamechecks:dialog/modal.rml", new() { Mode = RmlWindowMode.Modal, CloseOnEscape = false });
             modal.Show(); var modalView = (GameDialog)modal.View!;
             check(modalView.Focused && !view.Focused && modalView.DisableMouseGrab, "modal takes focus from another RmlUi window");
+            using (var dock = ui.LoadDocumentFromString("gamechecks", "<rml><body>Inspector</body></rml>", "gamechecks:dialog/dock.rml", new() { FocusOnOpen = false, CloseOnEscape = false }))
+            {
+                dock.Show(); var dockView = (GameDialog)dock.View!;
+                check(modalView.Focused && !dockView.Focused && dockView.ShouldReceiveMouseEvents(), "docked inspector opens interactively without stealing modal focus");
+                dock.Close(); dock.Show();
+                check(modalView.Focused && !dockView.Focused, "reopening an inspector preserves modal focus");
+            }
             var mouse = new MouseEvent(799, 599, EnumMouseButton.Left, 0); modalView.OnMouseDown(mouse);
             check(mouse.Handled, "modal captures clicks outside document geometry");
             var esc = new KeyEvent { KeyCode = (int)GlKeys.Escape }; modalView.OnKeyDown(esc);

@@ -19,7 +19,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parent
 REVISION = "3045e6e3510425ef2870f7647b3f59d3ae9970f5"
 FILES = {"win": "vsrmlui_native.dll", "linux": "libvsrmlui_native.so", "osx": "libvsrmlui_native.dylib"}
-SUPPORTED = ("win-x64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64")
+SUPPORTED = ("win-x64", "linux-x64", "osx-x64", "osx-arm64")
 VERSION = "1.0.0"
 REQUIRED = ("win-x64", "linux-x64")
 
@@ -72,7 +72,7 @@ def archive(source, destination):
 
 
 def package_merged(native_root):
-    """Require Windows/Linux; include macOS and ARM64 when validated builds exist."""
+    """Require Windows/Linux; include validated macOS builds and the optional test mod."""
     native_root = native_root.resolve()
     missing = [rid for rid in REQUIRED if not (native_root / rid / FILES[rid.split('-')[0]]).is_file()]
     if missing:
@@ -88,7 +88,7 @@ def package_merged(native_root):
         mod = Path(temporary)
         for name in ("VSRmlUi.dll",):
             copy(managed / name, mod / name)
-        for name in ("modinfo.json", "assets"):
+        for name in ("modinfo.json", "modicon.png", "assets"):
             copy(ROOT / "src/VSRmlUi" / name, mod / name)
         included = {}
         for rid in SUPPORTED:
@@ -112,6 +112,24 @@ def package_merged(native_root):
                 copy(license_file, license_stage / license_file.name)
         archive(mod, ROOT / "artifacts" / f"vsrmlui_{VERSION}.zip")
         print("Packaged native RIDs:", ", ".join(included))
+    package_test_mod()
+
+
+def package_test_mod():
+    """Package the example/input diagnostics mod when a managed build staged it."""
+    staged = ROOT / "artifacts" / "example"
+    required = (staged / "VSRmlUi.Example.dll", staged / "modinfo.json")
+    if not all(path.is_file() for path in required):
+        return
+    with tempfile.TemporaryDirectory(prefix="package-test-", dir=ROOT / "build") as temporary:
+        mod = Path(temporary)
+        for path in required:
+            copy(path, mod / path.name)
+        if (staged / "assets").is_dir():
+            copy(staged / "assets", mod / "assets")
+        copy(ROOT / "LICENSE", mod / "LICENSE")
+        archive(mod, ROOT / "artifacts" / f"vsrmlui-test_{VERSION}.zip")
+    print("Packaged input diagnostics mod: vsrmlui-test_" + VERSION + ".zip")
 
 
 def main():
@@ -185,6 +203,10 @@ def main():
     for name in ("VSRmlUi.dll", "VSRmlUi.xml"):
         copy(mod_output / name, managed / name)
         copy(mod_output / name, ROOT / "artifacts/sdk" / name)
+    example_output = ROOT / "examples/VSRmlUi.Example/bin/Release/net10.0"
+    for name in ("VSRmlUi.Example.dll", "modinfo.json"):
+        copy(example_output / name, ROOT / "artifacts/example" / name)
+    copy(example_output / "assets", ROOT / "artifacts/example/assets")
     metadata = {"version": VERSION, "sha256": hashlib.sha256((managed / "VSRmlUi.dll").read_bytes()).hexdigest(), "managedTests": not args.skip_tests, "graphicsTests": not args.skip_tests and not args.headless_tests}
     (managed / "manifest.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     if args.prepare_only:

@@ -1,0 +1,15 @@
+.rml-picker { display: inline-block; vertical-align: top; box-sizing: border-box; }
+.picker-entry { display: flex; align-items: center; }
+.picker-entry .color-swatch { width: 38dp; height: 38dp; flex-shrink: 0; margin-right: 8dp; padding: 0dp; border: 1dp #777777; border-radius: 4dp; }
+.picker-entry .color-value { flex: 1; min-width: 0dp; width: auto; }
+.picker-panel { margin-top: 8dp; }
+.picker-channel { display: flex; align-items: center; height: 32dp; }
+.picker-channel label { width: 30dp; flex-shrink: 0; font-size: 13dp; }
+.picker-channel .range { flex: 1; min-width: 0dp; }
+.rml-picker .time-value { width: 100%; }
+input.range { display: inline-block; height: 30dp; padding: 0dp; border-width: 0; background-color: transparent; }
+input.range slidertrack { height: 4dp; margin-top: 13dp; background-color: #565a63; border-radius: 2dp; }
+input.range sliderbar { width: 14dp; height: 20dp; margin-top: 5dp; background-color: #80baff; border-radius: 4dp; }
+input.range sliderbar:hover, input.range sliderbar:active { background-color: #b5d7ff; }
+input.range sliderarrowdec, input.range sliderarrowinc { display: none; }
+input[aria-invalid=true] { color: #ff9da8; }

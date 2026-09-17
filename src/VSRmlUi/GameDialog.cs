@@ -10,17 +10,25 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
 {
     private readonly RmlDocument document;
     private readonly GameHost host;
+    private readonly Func<int> lockModifiers;
     private readonly HashSet<int> pressedKeys = [];
     private readonly HashSet<int> pressedButtons = [];
     private char? highSurrogate;
     private bool disposed;
     private bool closing;
-    internal GameDialog(ICoreClientAPI api, GameHost host, RmlDocument document) : base(api) { this.document = document; this.host = host; document.Runtime.AttachHost(this, document); }
-    private bool Interactive => document.Options.Mode != RmlWindowMode.Hud;
-    private bool Modal => document.Options.Mode == RmlWindowMode.Modal;
+    internal GameDialog(ICoreClientAPI api, GameHost host, RmlDocument document) : this(api, host, document, KeyboardLocks.ReadModifiers) { }
+    internal GameDialog(ICoreClientAPI api, GameHost host, RmlDocument document, Func<int> lockModifiers) : base(api)
+    { this.document = document; this.host = host; this.lockModifiers = lockModifiers; document.Runtime.AttachHost(this, document); }
+    // A visible, input-disabled document is a passive HUD. Merely returning
+    // false from input handlers leaves it counted in ClientMain.DialogsOpened,
+    // which prevents mouse capture outside immersive mouse mode.
+    private bool Interactive => document.Options.Mode != RmlWindowMode.Hud
+        && (document.Options.Input.ReceiveMouse || document.Options.Input.ReceiveKeyboard);
+    private bool Modal => Interactive && document.Options.Mode == RmlWindowMode.Modal;
     public override string ToggleKeyCombinationCode => null!;
     public override string DebugName => $"RmlUi/{document.OwnerModId}/{document.SourcePath}";
     public override double DrawOrder => document.Options.DrawOrder;
+    public override double InputOrder => document.Options.InputOrder;
     public override EnumDialogType DialogType => Interactive ? EnumDialogType.Dialog : EnumDialogType.HUD;
     public override bool Focusable => Interactive;
     public override bool PrefersUngrabbedMouse => Interactive && document.Options.UnlockMouse && document.Options.Input.UnlockMouse;
@@ -36,7 +44,9 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
     public override bool ShouldReceiveRenderEvents() => !disposed && opened && document.IsVisible && document.DrawTarget == RmlRenderScope.Current;
     public override bool ShouldReceiveMouseEvents() => !disposed && opened && Interactive && document.Options.Input.ReceiveMouse;
     public override bool ShouldReceiveKeyboardEvents() => !disposed && opened && focused && Interactive && document.Options.Input.ReceiveKeyboard;
-    public bool Open() => TryOpen(Interactive);
+    public bool Open() => TryOpen(Interactive && document.Options.FocusOnOpen);
+    internal void RestoreFocus() { if (!disposed && opened) capi.Gui.RequestFocus(this); }
+    internal bool PrimaryButtonDown => capi.Input.MouseButton.Left;
     public void Close() => TryClose();
     public override bool TryClose()
     {
@@ -87,7 +97,7 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
         var keys = capi.Input.KeyboardKeyStateRaw;
         bool Down(GlKeys key) => (int)key < keys.Length && keys[(int)key];
         return (Down(GlKeys.LControl) || Down(GlKeys.RControl) ? 1 : 0) | (Down(GlKeys.LShift) || Down(GlKeys.RShift) ? 2 : 0)
-            | (Down(GlKeys.LAlt) || Down(GlKeys.RAlt) ? 4 : 0) | (Down(GlKeys.LWin) || Down(GlKeys.RWin) ? 8 : 0);
+            | (Down(GlKeys.LAlt) || Down(GlKeys.RAlt) ? 4 : 0) | (Down(GlKeys.LWin) || Down(GlKeys.RWin) ? 8 : 0) | lockModifiers();
     }
     private static int Button(EnumMouseButton button) => button switch { EnumMouseButton.Left => 0, EnumMouseButton.Right => 1, EnumMouseButton.Middle => 2, _ => -1 };
     public override void OnMouseMove(MouseEvent args)
@@ -132,7 +142,7 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
         if (hover || Modal) { document.Call(8, Modifiers(), value: -args.deltaPrecise); args.SetHandled(true); }
         document.Runtime.DrainEvents();
     }
-    private static int Modifiers(KeyEvent args) => KeyMap.Modifiers(args, OperatingSystem.IsMacOS());
+    private int Modifiers(KeyEvent args) => KeyMap.Modifiers(args, OperatingSystem.IsMacOS()) | lockModifiers();
     public override void OnKeyDown(KeyEvent args)
     {
         if (args.Handled || !ShouldReceiveKeyboardEvents()) return;
@@ -161,8 +171,10 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
     {
         if (args.Handled || !ShouldReceiveKeyboardEvents()) return;
         if (ignoreNextKeyPress) { ignoreNextKeyPress = false; args.Handled = true; return; }
-        // AltGr may be reported as Ctrl+Alt; committed characters must still reach RmlUi.
-        if ((args.CtrlPressed && !args.AltPressed) || args.CommandPressed || char.IsControl(args.KeyChar)) return;
+        // KeyChar is the game's committed text event. Keep it independent from
+        // the physical modifier state: Linux IMEs and AltGr may report modifiers
+        // while still producing a valid Unicode character.
+        if (char.IsControl(args.KeyChar)) return;
         char ch = args.KeyChar;
         if (char.IsHighSurrogate(ch)) { highSurrogate = ch; args.Handled = true; return; }
         string text = char.IsLowSurrogate(ch) && highSurrogate.HasValue ? new string([highSurrogate.Value, ch]) : char.IsSurrogate(ch) ? "" : ch.ToString();

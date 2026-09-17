@@ -3,7 +3,7 @@
   "name": "RmlUi Examples",
   "modid": "vsrmluiexample",
   "version": "1.0.0",
-  "description": "Press Ctrl+F8 to open the RmlUi example window. Includes a HUD and modal dialog.",
+  "description": "Press Ctrl+F8 for the RmlUi example or Ctrl+F9 for the input/IME diagnostics window.",
   "authors": ["VSCN-Studio"],
   "side": "Client",
   "requiredOnClient": false,

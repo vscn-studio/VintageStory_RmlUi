@@ -4,7 +4,7 @@
 
 `VSRmlUi` 是 Vintage Story 的客户端 UI 基础库。它通过 C# API 接入 RmlUi，让模组使用 RML 和 RCSS 制作窗口、模态对话框和 HUD。
 
-当前版本为 **1.0.0**，目标环境为 Vintage Story 1.22、.NET 10 和 OpenGL 3.3+。支持 Windows、Linux、macOS 的构建流程；仓库当前提供 Windows/Linux 原生库，macOS 需要自行构建。
+当前版本为 **1.0.0**，目标环境为 Vintage Story 1.22、.NET 10 和 OpenGL 3.3+。构建流程支持 Windows、Linux、macOS；当前合并包收录四个已通过 native smoke 的 RID：`win-x64`、`linux-x64`、`osx-x64` 和 `osx-arm64`。官方 Vintage Story Linux 客户端没有 ARM64 发行版，因此不打包 Linux ARM64 native。
 
 ## 接入模组
 
@@ -35,6 +35,21 @@ page.Show();
 
 完整示例见 [`examples/`](examples/)，API 定义见 [`src/VSRmlUi/`](src/VSRmlUi/)。
 
+## 基础控件
+
+`RmlControls.ColorPicker`、`TimePicker`、`Slider` 可生成嵌入表单的 RML。页面应在自身样式之后引用 `vsrmlui:dialog/controls.rcss`，并为 `.rml-picker` 设置适合表单的宽度。
+
+加载文档后绑定选择器：
+
+```csharp
+RmlControls.BindColorPicker(page, "fog-color", hex => config.FogColor = hex);
+RmlControls.BindTimePicker(page, "day-time", time => SetTime(time), includeSeconds: false);
+```
+
+颜色选择器点击色块打开纯 RmlUi 经典布局模态窗口：48 个基本颜色、16 个自定义颜色、可拖拽的色相/饱和度色谱和亮度条、RGB/HSL/HEX 同步输入、透明度滑块及原颜色/新颜色预览。不调用 Windows 原生对话框。“确定”提交草稿；取消或 ESC 放弃，父窗口关闭时子窗口也关闭。自定义颜色保存到客户端 `ModConfig/vsrmlui-colors.json`（添加自定义色板独立于颜色草稿的取消操作）。`BindColorPicker` 的可选 `dialogOpened` 回调可用于宿主管理窗口层级，`allowAlpha: false` 隐藏透明度并限制为 RGB。也可直接调用 `RmlColorDialog.Show(parent, hex, accepted, allowAlpha)`。
+
+时间选择器支持时、分以及可选秒的滑块和文字输入。`TimePicker` 与 `BindTimePicker` 的 `includeSeconds` 参数应一致。时间值是一天内的时刻，不用于多日时长。无效输入不会触发配置更新；监听器随文档销毁释放。`Slider` 是原生 `input[type=range]`，通过元素的 `change` 事件读取 `Value`，支持小数步长。
+
 ## 构建
 
 需要 Python 3.10+、.NET 10 SDK、CMake 3.24+ 和对应平台的 C/C++ 工具链，同时准备 Vintage Story 安装目录和指定版本的 RmlUi 源码。
@@ -51,7 +66,7 @@ Linux/macOS：
 python3 build.py --game-directory /path/to/game --rmlui-source /path/to/RmlUi
 ```
 
-构建脚本会生成原生桥接、基础模组、示例和 SDK；所有原生库齐全后才会生成 `artifacts/vsrmlui_1.0.0.zip`。
+构建脚本会生成原生桥接、基础模组、示例和 SDK；所有原生库齐全后会生成 `artifacts/vsrmlui_1.0.0.zip`。如果示例也成功构建，还会生成可单独安装的 `artifacts/vsrmlui-test_1.0.0.zip`。先安装主模组，再安装测试模组；进入客户端后按 **Ctrl+F9**（macOS 使用游戏显示的对应修饰键）打开输入诊断窗口。窗口包含单行/多行文本、数字、下拉框、复选框、滑块和事件日志，可用于检查 IME 提交字符、AltGr、Emoji、粘贴以及编辑快捷键。
 
 ## 许可证
 

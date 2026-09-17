@@ -1,19 +1,23 @@
-# 1.0.0 release validation — 2026-09-14
+# 1.0.0 release validation — 2026-09-16
 
-Both Windows x64 and Linux x64 passed the C ABI smoke check and all **89** managed/integration/OpenGL checks.
+The current native bundle contains Windows x64, Linux x64, macOS x64, and macOS arm64. Linux x64 was rebuilt under WSL Ubuntu 24.04, Windows x64 was rebuilt with MSVC, and both passed the native C ABI smoke test. The two macOS libraries came from the successful GitHub Actions run for commit `2ea9ff7`; their architecture, dependency, signing, and native smoke steps passed on the target runners. Linux ARM64 is excluded because the official Vintage Story Linux client has no ARM64 distribution.
+
+The managed build was refreshed after the committed-text input fix. The headless integration run passed **111** checks, and the full Windows run passed **123** checks, including the input-diagnostics document, committed IME text with Ctrl, AltGr text, and macOS Command+A mapping. This verifies the event adapter with API doubles; it does not verify physical IME composition or candidate windows on Linux/macOS.
+
+Windows x64 passed the C ABI smoke check and all **123** managed/integration/OpenGL checks in the current rebuild. The recorded Linux x64 run passed the previous **121** checks; its native smoke and GLX/Xvfb results remain valid, while the new diagnostics-document checks have not been rerun under WSL.
 
 | Host | Managed/game | Native | Graphics |
 |---|---|---|---|
 | Windows x64 | .NET SDK 10.0.301, VS API 1.22.3.0 | MSVC 19.51 | NVIDIA RTX 4070 Laptop, OpenGL 3.3 Core |
 | Ubuntu 24.04 x64 under WSL | .NET SDK 10.0.401, VS API 1.22.7.0 | GCC 13.3 | Xvfb, Mesa 25.2.8 llvmpipe, OpenGL 4.5 Core |
 
-New checks cover the five supported OS/process-architecture mappings, rejection of unsupported platforms, AltGr committed text, and Command+A selection through the real native text widget (platform mapping simulated on each test host). Existing framebuffer, Chinese glyph, premultiplied image, GL state, lifecycle, callback and GuiDialog adapter checks continue to pass. macOS Command behavior has **not** been tested on physical macOS input events.
+New checks cover the four supported OS/process-architecture mappings, rejection of unsupported platforms, AltGr committed text, the input-diagnostics document, and Command+A selection through the real native text widget (platform mapping simulated on each test host). Existing framebuffer, Chinese glyph, premultiplied image, GL state, lifecycle, callback and GuiDialog adapter checks continue to pass. macOS Command behavior has **not** been tested on physical macOS input events.
 
 Linux uses the game's shipped `libglfw.so.3` and `libSkiaSharp.so`. The local binary's highest required symbol versions are `GLIBC_2.38` and `GLIBCXX_3.4.29`; all dynamic dependencies resolved in Ubuntu 24.04. Mesa emitted device-probing EGL/Zink warnings before selecting llvmpipe; the GL checks then passed without OpenGL errors or RmlUi parser/font/resource warnings. This is a software GLX test, not native Wayland/EGL or hardware Linux driver validation.
 
-Portable build, native artifact manifests, local platform ZIPs, and a combined Windows/Linux ZIP are provided. The five-platform GitHub Actions workflow is prepared but was not submitted or run. Linux arm64 and macOS x64/arm64 binaries are **not included** in the local packages. macOS deployment target, ad-hoc signing, process-architecture loading, and forward-compatible test context are configured but remain unverified on a Mac.
+Portable build, native artifact manifests, local platform ZIPs, and a four-RID combined ZIP are provided. The four-platform GitHub Actions native workflow completed successfully for commit `2ea9ff7`. macOS deployment target, ad-hoc signing, process-architecture loading, and forward-compatible test context passed their CI/native steps but remain unverified inside a real Mac game process.
 
-Full test logs: `build/windows-tests.log` and `build/linux-full.log`. Neither run launched a real Vintage Story world. Mod archive loading in the game, original menus and Director coexistence, IME, Retina/physical DPI and extended world transitions remain acceptance work. See [platform details](PLATFORMS.zh-CN.md) and [Director gaps](DIRECTOR_MIGRATION_GAPS.zh-CN.md).
+Full test logs: `build/windows-tests.log` and `build/linux-full.log`. Neither run launched a real Vintage Story world. Remaining acceptance work is real archive loading, original GUI/ImGui coexistence, physical OS IME composition and candidate-window positioning, macOS Command/input behavior, Retina/physical DPI and window modes, Linux hardware drivers and native Wayland/EGL, text undo/redo history, and extended world transitions. Server-side UI remains disabled. See [platform details](PLATFORMS.zh-CN.md) and [Director gaps](DIRECTOR_MIGRATION_GAPS.zh-CN.md).
 
 ## Historical 0.1.0 baseline
 

@@ -33,14 +33,38 @@ Console.WriteLine($"Game API: {typeof(ModSystem).Assembly.GetName().Version}; Na
 foreach (var os in new[] { "win", "linux", "osx" })
     foreach (var arch in new[] { Architecture.X64, Architecture.Arm64 })
         if (os != "win" || arch == Architecture.X64)
-            Check(PlatformLibrary.Get(os, arch).Rid == $"{os}-{arch.ToString().ToLowerInvariant()}", $"portable native RID {os}/{arch}");
+            if (os != "linux" || arch == Architecture.X64)
+                Check(PlatformLibrary.Get(os, arch).Rid == $"{os}-{arch.ToString().ToLowerInvariant()}", $"portable native RID {os}/{arch}");
 Throws<PlatformNotSupportedException>(() => PlatformLibrary.Get("linux", Architecture.X86), "reject unsupported native architecture");
+Throws<PlatformNotSupportedException>(() => PlatformLibrary.Get("linux", Architecture.Arm64), "reject unsupported Linux ARM64 game process");
 Throws<PlatformNotSupportedException>(() => PlatformLibrary.Get("unknown", Architecture.X64), "reject unsupported native OS");
 Check(RmlAssetPath.Normalize("demo:dialog/a/../b.rml") == "demo:dialog/b.rml", "asset path normalization");
 Throws<ArgumentException>(() => RmlAssetPath.Normalize("demo:../../secret"), "reject asset domain traversal");
 Throws<ArgumentException>(() => RmlAssetPath.Normalize("https://example.com/ui.rml"), "reject network URL assets");
 Check(KeyMap.Convert(GlKeys.A) == 12 && KeyMap.Convert(GlKeys.Number9) == 11 && KeyMap.Convert(GlKeys.BackSpace) == 69, "game key mapping");
 Check(!new RmlUiModSystem().ShouldLoad(EnumAppSide.Server), "server does not start the UI system");
+Check(RmlControls.TryParseColor("#123456", out uint rgb) && rgb == 0x123456ff, "shared color parser supplies opaque alpha");
+Check(RmlControls.TryParseColor("#12345680", out uint rgba) && rgba == 0x12345680, "shared color parser retains RGBA alpha");
+Check(!RmlControls.TryParseColor("#GG0000", out _) && !RmlControls.TryParseColor(null, out _), "shared color parser rejects invalid values");
+Check(RmlControls.TryParseTime("23:59:58", out TimeSpan clock) && clock == new TimeSpan(23, 59, 58), "shared time parser supports seconds");
+Check(!RmlControls.TryParseTime("24:00", out _) && !RmlControls.TryParseTime("12:60", out _), "shared clock picker rejects invalid clock components");
+using (var controlsRuntime = new RmlRuntime(host, headless: true))
+{
+    controlsRuntime.RegisterFont("game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
+    using var controls = controlsRuntime.LoadDocumentFromString("test", "<rml><head></head><body>" + RmlControls.ColorPicker("color", "#FF0000") + RmlControls.TimePicker("clock", new TimeSpan(1, 2, 3)) + "</body></rml>", "test:dialog/controls.rml");
+    string editedColor = ""; TimeSpan editedTime = TimeSpan.Zero;
+    RmlDocument? colorDialog = null;
+    RmlControls.BindColorPicker(controls, "color", value => editedColor = value, child => colorDialog = child);
+    RmlControls.BindTimePicker(controls, "clock", value => editedTime = value);
+    var seconds = controls.GetElementById("clock-SS")!; seconds.Value = "45"; seconds.DispatchEvent("change");
+    Check(editedTime == new TimeSpan(1, 2, 45) && controls.GetElementById("clock")!.Value == "01:02:45", "shared time picker binds seconds to its clock text");
+    var toggle = controls.GetElementById("color-toggle")!; toggle.DispatchEvent("click");
+    Check(toggle.GetAttribute("aria-expanded") == "true", "shared color picker exposes expansion state");
+    var alpha = colorDialog!.GetElementById("A")!; alpha.Value = "0"; alpha.DispatchEvent("change");
+    Check(editedColor == "", "classic dialog keeps transparent alpha in the draft");
+    colorDialog.GetElementById("ok")!.DispatchEvent("click");
+    Check(editedColor == "#FF000000" && toggle.GetAttribute("aria-expanded") == "false", "shared color dialog commits transparent alpha and resets open state");
+}
 for (int cycle = 0; cycle < 3; cycle++)
 {
     using var ui = new RmlRuntime(host, headless: true);
@@ -154,6 +178,11 @@ if (!args.Contains("--headless"))
         Check(document.Call(5, 200, 150) != 0, "window surface captures mouse");
         document.Call(3, 1000, 800, 1.5f); document.Call(4);
         Check(GL.GetError() == ErrorCode.NoError, "GUI scale change renders correctly");
+        using var inputDiagnostics = ui.LoadDocument("vsrmluiexample", "vsrmluiexample:dialog/input-test.rml");
+        inputDiagnostics.Show(); inputDiagnostics.Call(3, 1000, 800, 1); inputDiagnostics.Call(4);
+        Check(inputDiagnostics.GetElementById("single")!.Value.Contains("中文"), "input diagnostics loads committed Unicode text");
+        Check(inputDiagnostics.GetElementById("multiline") is not null && inputDiagnostics.GetElementById("choice") is not null, "input diagnostics exposes multiline and select controls");
+        inputDiagnostics.Close();
         document.Close(); document.Dispose();
         Check(Snapshot() == before, "OpenGL state preserved across document destruction");
         using var imageDoc = ui.LoadDocumentFromString("test", """

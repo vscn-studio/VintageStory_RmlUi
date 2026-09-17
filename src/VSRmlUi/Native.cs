@@ -62,6 +62,7 @@ internal static class PlatformLibrary
         string arch = architecture switch { Architecture.X64 => "x64", Architecture.Arm64 => "arm64", _ => throw new PlatformNotSupportedException($"RmlUi requires an x64 or arm64 game process; got {architecture}.") };
         string file = os switch { "win" => "vsrmlui_native.dll", "linux" => "libvsrmlui_native.so", "osx" => "libvsrmlui_native.dylib", _ => throw new PlatformNotSupportedException($"RmlUi does not support OS {os}.") };
         if (os == "win" && architecture != Architecture.X64) throw new PlatformNotSupportedException("RmlUi Windows builds currently require an x64 game process.");
+        if (os == "linux" && architecture == Architecture.Arm64) throw new PlatformNotSupportedException("RmlUi Linux builds currently require an x64 Vintage Story game process.");
         return ($"{os}-{arch}", file);
     }
 }

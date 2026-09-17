@@ -28,6 +28,8 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
     private bool draining;
     private bool disposing;
     internal Func<RmlDocument, IDocumentView>? CreateView { get; set; }
+    internal RmlCustomColorPalette ColorPalette { get; set; } = new();
+    internal Action? SaveColorPalette { get; set; }
     internal Func<(int Width, int Height, float Scale)> Dimensions { get; set; } = () => (1280, 720, 1);
     public bool IsAvailable { get; private set; }
     public string Version => "1.0.0";
@@ -57,7 +59,7 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
         if (!owner.All(char.IsAsciiLetterOrDigit)) throw new ArgumentException("Owner must be a Vintage Story mod ID.", nameof(owner));
         path = RmlAssetPath.Normalize(path);
         options ??= new();
-        if (!Enum.IsDefined(options.Mode) || !double.IsFinite(options.DrawOrder)) throw new ArgumentException("Invalid document options.", nameof(options));
+        if (!Enum.IsDefined(options.Mode) || !double.IsFinite(options.DrawOrder) || !double.IsFinite(options.InputOrder)) throw new ArgumentException("Invalid document options.", nameof(options));
         var size = Dimensions();
         ulong handle = Native.vr_load(path, markup, size.Width, size.Height, size.Scale); Native.Check();
         if (handle == 0) throw new RmlUiException("Document creation failed.");

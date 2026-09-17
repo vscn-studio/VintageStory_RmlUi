@@ -31,6 +31,10 @@ public sealed class RmlUiModSystem : ModSystem
         {
             var host = new GameHost(api);
             runtime = new RmlRuntime(host);
+            try { runtime.ColorPalette = api.LoadModConfig<RmlCustomColorPalette>("vsrmlui-colors.json") ?? new(); }
+            catch (Exception ex) { api.Logger.Warning("[vsrmlui] Unable to load custom colors: {0}", ex.Message); }
+            runtime.ColorPalette.Normalize();
+            runtime.SaveColorPalette = () => api.StoreModConfig(runtime.ColorPalette, "vsrmlui-colors.json");
             runtime.Dimensions = () => (Math.Max(1, api.Render.FrameWidth), Math.Max(1, api.Render.FrameHeight), Math.Max(0.25f, RuntimeEnv.GUIScale));
             runtime.CreateView = document => new GameDialog(api, host, document);
             // Montserrat is not present in every Vintage Story distribution (notably

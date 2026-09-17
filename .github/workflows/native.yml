@@ -1,13 +1,13 @@
 name: Native platforms
 on:
   push:
-    paths: ['native/**', 'tests/native_smoke.py', 'build.py', '.github/workflows/native.yml']
+    paths: ['native/**', 'src/**', 'examples/**', 'tests/**', 'build.py', '.github/workflows/native.yml']
   pull_request:
-    paths: ['native/**', 'tests/native_smoke.py', 'build.py', '.github/workflows/native.yml']
+    paths: ['native/**', 'src/**', 'examples/**', 'tests/**', 'build.py', '.github/workflows/native.yml']
   workflow_dispatch:
     inputs:
       package_release:
-        description: 'Build the single 1.0.0 release ZIP on a configured self-hosted Windows runner (VS_GAME_DIRECTORY required)'
+        description: 'Build the 1.0.0 release and input-diagnostics ZIPs on a configured self-hosted Windows runner (VS_GAME_DIRECTORY required)'
         type: boolean
         default: false
 permissions:
@@ -20,7 +20,6 @@ jobs:
         include:
           - { runner: windows-2022, rid: win-x64 }
           - { runner: ubuntu-22.04, rid: linux-x64 }
-          - { runner: ubuntu-24.04-arm, rid: linux-arm64 }
           - { runner: macos-15-intel, rid: osx-x64 }
           - { runner: macos-15, rid: osx-arm64 }
     runs-on: ${{ matrix.runner }}
@@ -77,11 +76,13 @@ jobs:
         run: |
           if (-not $env:VS_GAME_DIRECTORY) { throw 'Set VS_GAME_DIRECTORY on this runner.' }
           ./build.ps1 -PrepareOnly -HeadlessTests -GameDirectory $env:VS_GAME_DIRECTORY -RmlUiSource upstream/RmlUi
-      - name: Create the only release ZIP
+      - name: Create release and input-diagnostics ZIPs
         shell: pwsh
         run: ./build.ps1 -PackageOnly -BundleNative collected-native
       - uses: actions/upload-artifact@v4
         with:
           name: vsrmlui-1.0.0-release
-          path: artifacts/vsrmlui_1.0.0_multi.zip
+          path: |
+            artifacts/vsrmlui_1.0.0.zip
+            artifacts/vsrmlui-test_1.0.0.zip
           if-no-files-found: error

@@ -9,6 +9,7 @@ public enum RmlWindowMode { Window, Modal, Hud }
 
 public sealed class RmlInputPolicy
 {
+    /// <summary>When both ReceiveMouse and ReceiveKeyboard are false, the host becomes a non-focusable HUD without blocking mouse capture.</summary>
     public bool ReceiveMouse { get; set; } = true;
     public bool ReceiveKeyboard { get; set; } = true;
     public bool UnlockMouse { get; set; } = true;
@@ -24,8 +25,12 @@ public sealed record RmlDocumentOptions
 {
     public RmlWindowMode Mode { get; init; } = RmlWindowMode.Window;
     public bool CloseOnEscape { get; init; } = true;
+    /// <summary>False lets persistent docked panels appear without stealing keyboard focus.</summary>
+    public bool FocusOnOpen { get; init; } = true;
     public bool UnlockMouse { get; init; } = true;
     public double DrawOrder { get; init; } = 0.2;
+    /// <summary>Lower values receive mouse events first; use a negative value to overlay the native pause menu.</summary>
+    public double InputOrder { get; init; } = 0.5;
     public RmlDrawTarget DrawTarget { get; init; } = RmlDrawTarget.Screen;
     public RmlInputPolicy Input { get; init; } = new();
 }

@@ -1,0 +1,15 @@
+{
+  "color-title": "Color",
+  "color-basic": "Basic colors",
+  "color-custom": "Custom colors",
+  "color-add": "Add to custom colors",
+  "color-spectrum": "Color spectrum",
+  "color-lightness": "Lightness",
+  "color-old": "Original",
+  "color-new": "New",
+  "color-alpha": "Alpha",
+  "color-ok": "OK",
+  "color-cancel": "Cancel",
+  "color-invalid": "Enter a valid color value.",
+  "color-save-failed": "Could not save custom colors."
+}
