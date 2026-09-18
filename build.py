@@ -104,11 +104,12 @@ def package_merged(native_root):
             copy(binary, mod / "native" / rid / binary.name)
             included[rid] = manifest
         # The game only needs the assembly, metadata, assets and native binaries.
-        # Keep license texts for redistribution compliance; build manifests/docs stay outside the mod ZIP.
+        # Copyright, attribution and license texts accompany the distributed components.
         copy(ROOT / "LICENSE", mod / "LICENSE")
+        copy(ROOT / "COPYRIGHT.txt", mod / "COPYRIGHT.txt")
         license_stage = mod / "licenses"
         for license_file in (ROOT / "licenses").iterdir():
-            if license_file.is_file() and license_file.suffix.lower() != ".md":
+            if license_file.is_file():
                 copy(license_file, license_stage / license_file.name)
         archive(mod, ROOT / "artifacts" / f"vsrmlui_{VERSION}.zip")
         print("Packaged native RIDs:", ", ".join(included))
@@ -128,6 +129,8 @@ def package_test_mod():
         if (staged / "assets").is_dir():
             copy(staged / "assets", mod / "assets")
         copy(ROOT / "LICENSE", mod / "LICENSE")
+        copy(ROOT / "COPYRIGHT.txt", mod / "COPYRIGHT.txt")
+        copy(ROOT / "licenses", mod / "licenses")
         archive(mod, ROOT / "artifacts" / f"vsrmlui-test_{VERSION}.zip")
     print("Packaged input diagnostics mod: vsrmlui-test_" + VERSION + ".zip")
 

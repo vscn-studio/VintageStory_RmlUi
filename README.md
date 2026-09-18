@@ -84,6 +84,6 @@ python3 build.py --game-directory /path/to/game --rmlui-source /path/to/RmlUi
 
 ## 许可证
 
-本项目原创代码版权归 **VSCN-Studio © 2026**，使用 [MIT 许可证](LICENSE)。RmlUi、FreeType、GLAD、Khronos headers 和 Noto Sans SC 使用各自许可证，详见 [`licenses/`](licenses/) 和 [`licenses/THIRD-PARTY.md`](licenses/THIRD-PARTY.md)。
+本项目原创代码版权归 **VSCN-Studio © 2026**，使用 [MIT 许可证](LICENSE)，项目版权声明见 [COPYRIGHT.txt](COPYRIGHT.txt)。RmlUi、FreeType、GLAD、Khronos headers 和 Noto Sans SC 使用各自许可证，详见 [`licenses/`](licenses/) 和 [`licenses/THIRD-PARTY.md`](licenses/THIRD-PARTY.md)。发行包包含版权声明、MIT 许可证、第三方归属说明及完整第三方许可文本。
 
 Vintage Story 是 Anego Studios 的商标。本项目是独立的模组库，与 Anego Studios 无隶属或背书关系。

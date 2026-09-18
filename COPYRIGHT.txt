@@ -1,0 +1,14 @@
+Vintage Story RmlUi / VSRmlUi
+Copyright (c) 2026 VSCN-Studio
+
+本项目原创代码、界面和文档的版权归 VSCN-Studio 所有，采用 MIT 许可证，
+全文见 LICENSE。第三方组件和字体适用各自许可证，归属与来源见
+licenses/THIRD-PARTY.md；完整许可文本保存在 licenses 目录。
+
+Original integration code, interface, and documentation are distributed
+under the MIT License; see LICENSE. Third-party components and fonts retain
+their own copyright notices and licenses. See licenses/THIRD-PARTY.md for
+attribution and sources, and licenses/ for the complete license texts.
+
+Vintage Story is a trademark of Anego Studios. This is an independent mod
+and is not affiliated with or endorsed by Anego Studios.

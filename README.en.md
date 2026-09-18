@@ -79,6 +79,8 @@ The scripts build the native bridge, managed mod, example, tests, and SDK. Packa
 
 ## License and notices
 
+The release packages include [COPYRIGHT.txt](COPYRIGHT.txt), the project MIT license, and the complete `licenses/` directory, including third-party attribution and license texts.
+
 Original VSRmlUi code is released under the [MIT License](LICENSE) © 2026 VSCN-Studio. RmlUi, FreeType, GLAD, Khronos headers, and Noto Sans SC are distributed under their respective licenses; see [`licenses/THIRD-PARTY.md`](licenses/THIRD-PARTY.md) and the files in `licenses/` for required notices.
 
 Vintage Story is a trademark of Anego Studios. This project is an independent mod library and is not affiliated with or endorsed by Anego Studios.

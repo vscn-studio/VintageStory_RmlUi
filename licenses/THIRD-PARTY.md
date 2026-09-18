@@ -2,7 +2,7 @@
 
 - **RmlUi**, MIT, Copyright (c) 2008–2014 CodePoint Ltd, Shift Technology Ltd and contributors; Copyright (c) 2019–2026 The RmlUi Team and contributors.
   Source: https://github.com/mikke89/RmlUi at `3045e6e3510425ef2870f7647b3f59d3ae9970f5`.
-  See `RmlUi-MIT.txt`. The GL3 renderer is built with one local build-copy patch to composite into the host framebuffer instead of framebuffer 0. Upstream sources are not modified.
+  See `RmlUi-MIT.txt`. Local build copies adapt the GL3 renderer to composite into the host framebuffer instead of framebuffer 0 and format select values within the dropdown content area. The upstream checkout is not modified.
 - **FreeType 2.13.3**, used under the FreeType License (FTL).
   Source: https://github.com/freetype/freetype/tree/VER-2-13-3.
   This software uses FreeType, Copyright (c) 1996–2024 The FreeType Project (www.freetype.org). All rights reserved.
