@@ -43,6 +43,8 @@ Linux 渲染器使用 `libGL.so.1` / `glXGetProcAddressARB`；原生 Wayland/EGL
 
 ## 当前交付状态
 
+2026-09-18 文件夹浏览器更新：本次本地合并包使用已重新构建验证的 Windows/Linux x64 原生库。此前 macOS 产物的源码指纹不匹配，未混入新包；下方四平台合包记录属于此前构建。
+
 版本已固定为 1.0.0。当前本地合并包包含四个 native RID：Windows/Linux x64、macOS x64 和 macOS arm64。构建示例后会额外产生 `vsrmlui-test_1.0.0.zip`，其中的 F9 输入诊断窗口用于真实游戏内检查 IME、键盘修饰键、文本控件和鼠标操作；它依赖主模组包。旧版本 ZIP（包括旧的双平台 multi 包及示例包）移至 `build/previous-packages/`，不再放在当前发布目录中。
 
 CI 默认执行四平台原生构建，这些是合包输入而不是可安装的模组分包。完整合包任务需要一台配置好 Python、.NET 10、MSVC/CMake、游戏目录的 Windows self-hosted runner，标签为 `vsrmlui-packaging`，环境变量 `VS_GAME_DIRECTORY` 指向游戏安装目录。手动运行工作流并启用 `package_release`，它会等待四平台 native 任务通过，下载全部产物、构建托管 DLL 和示例，并输出 `vsrmlui_1.0.0.zip` 与 `vsrmlui-test_1.0.0.zip`。未配置该 runner 时，先运行 native 任务，再把产物下载到本机 `artifacts/native`，用 `-PackageOnly` 合包。

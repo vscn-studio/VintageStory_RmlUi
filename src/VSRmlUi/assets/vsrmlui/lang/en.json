@@ -1,4 +1,13 @@
 {
+  "folder-title": "Choose folder",
+  "folder-up": "Up",
+  "folder-go": "Go",
+  "folder-home": "Home",
+  "folder-cancel": "Cancel",
+  "folder-select": "Select this folder",
+  "folder-loading": "Loading folders…",
+  "folder-empty": "No subfolders. You can select this folder.",
+  "folder-truncated": "Showing the first 2000 subfolders. Enter a full path to navigate directly.",
   "color-title": "Color",
   "color-basic": "Basic colors",
   "color-custom": "Custom colors",

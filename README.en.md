@@ -4,7 +4,7 @@
 
 `VSRmlUi` is a client-side UI foundation for [Vintage Story](https://www.vintagestory.at/). It exposes RmlUi documents through a small C# API, so mods can build windows, modal dialogs, and HUDs with RML and RCSS.
 
-The current release is **1.0.0**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The current merged bundle includes four native-smoke-tested RIDs: `win-x64`, `linux-x64`, `osx-x64`, and `osx-arm64`. The official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
+The current release is **1.0.0**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The local folder-browser build includes `win-x64` and `linux-x64`. Local macOS binaries have an older source fingerprint and need rebuilding and verification on their target platforms before inclusion. The official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
 
 ## Features
 
@@ -44,6 +44,10 @@ page.Show();
 All UI operations must run on the client thread. Use `api.Event.EnqueueMainThreadTask` when a background task needs to update a document. See the Chinese README and `examples/` for the complete API and resource layout.
 
 `RmlControls.ColorPicker` and `BindColorPicker` provide an inline swatch and hex field. Clicking the swatch opens a classic dark color dialog built entirely in RmlUi: 48 basic colors, 16 custom slots, draggable hue/saturation spectrum and luminance strip, synchronized RGB/HSL/HEX fields, alpha slider, and original/new previews. OK commits the draft; Cancel or Escape discards it. Custom slots are saved separately in `ModConfig/vsrmlui-colors.json`. Pass `allowAlpha: false` for RGB-only fields, or use `RmlColorDialog.Show(parent, hex, accepted, allowAlpha)` directly. The optional `dialogOpened` callback exposes the child document for host window-stack integration. No Windows native dialog is invoked.
+
+## Folder browser
+
+`RmlFolderDialog.Show(parent, api, initialPath, path => config.OutputDirectory = path)` opens a local folder picker built with Rml UI. It supports drives, the user directory, parent navigation, typed addresses, and subfolders. Directory enumeration runs in the background and displays at most 2,000 entries per folder. Unreadable directories cannot be selected. Confirmation returns an absolute path; cancellation or Escape leaves the caller's value unchanged. Closing the parent also closes the picker. The picker selects existing folders and does not move files or persist configuration.
 
 ## Building
 

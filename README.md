@@ -4,7 +4,7 @@
 
 `VSRmlUi` 是 Vintage Story 的客户端 UI 基础库。它通过 C# API 接入 RmlUi，让模组使用 RML 和 RCSS 制作窗口、模态对话框和 HUD。
 
-当前版本为 **1.0.0**，目标环境为 Vintage Story 1.22、.NET 10 和 OpenGL 3.3+。构建流程支持 Windows、Linux、macOS；当前合并包收录四个已通过 native smoke 的 RID：`win-x64`、`linux-x64`、`osx-x64` 和 `osx-arm64`。官方 Vintage Story Linux 客户端没有 ARM64 发行版，因此不打包 Linux ARM64 native。
+当前版本为 **1.0.0**，目标环境为 Vintage Story 1.22、.NET 10 和 OpenGL 3.3+。构建流程支持 Windows、Linux、macOS；本次文件夹浏览器构建的本地合并包包含 `win-x64` 和 `linux-x64`。本地 macOS 原生库的源码指纹较旧，需在对应平台重新构建并验证后再合包。官方 Vintage Story Linux 客户端没有 ARM64 发行版，因此不打包 Linux ARM64 native。
 
 ## 接入模组
 
@@ -49,6 +49,20 @@ RmlControls.BindTimePicker(page, "day-time", time => SetTime(time), includeSecon
 颜色选择器点击色块打开纯 RmlUi 经典布局模态窗口：48 个基本颜色、16 个自定义颜色、可拖拽的色相/饱和度色谱和亮度条、RGB/HSL/HEX 同步输入、透明度滑块及原颜色/新颜色预览。不调用 Windows 原生对话框。“确定”提交草稿；取消或 ESC 放弃，父窗口关闭时子窗口也关闭。自定义颜色保存到客户端 `ModConfig/vsrmlui-colors.json`（添加自定义色板独立于颜色草稿的取消操作）。`BindColorPicker` 的可选 `dialogOpened` 回调可用于宿主管理窗口层级，`allowAlpha: false` 隐藏透明度并限制为 RGB。也可直接调用 `RmlColorDialog.Show(parent, hex, accepted, allowAlpha)`。
 
 时间选择器支持时、分以及可选秒的滑块和文字输入。`TimePicker` 与 `BindTimePicker` 的 `includeSeconds` 参数应一致。时间值是一天内的时刻，不用于多日时长。无效输入不会触发配置更新；监听器随文档销毁释放。`Slider` 是原生 `input[type=range]`，通过元素的 `change` 事件读取 `Value`，支持小数步长。
+
+## 文件夹选择器
+
+`RmlFolderDialog` 提供纯 Rml UI 本机文件夹浏览器，可用于配置回放、视频等输出目录：
+
+```csharp
+RmlFolderDialog.Show(page, api, config.OutputDirectory, path =>
+{
+    config.OutputDirectory = path;
+    page.GetElementById("output-directory")!.Value = path;
+});
+```
+
+支持用户目录、磁盘、上级目录、直接输入地址和子目录列表。目录读取在后台执行，每次最多显示 2000 个子目录；不可访问的目录会显示错误且不能选择。确认返回绝对路径，取消或 Esc 不修改配置；父窗口关闭时浏览器同步关闭。它只选择现有目录，不移动文件或写入调用方配置。
 
 ## 构建
 

@@ -1,4 +1,13 @@
 {
+  "folder-title": "选择文件夹",
+  "folder-up": "上一级",
+  "folder-go": "前往",
+  "folder-home": "个人文件夹",
+  "folder-cancel": "取消",
+  "folder-select": "选择此文件夹",
+  "folder-loading": "正在读取文件夹…",
+  "folder-empty": "此文件夹没有子文件夹，可以直接选择。",
+  "folder-truncated": "仅显示前 2000 个子文件夹，可输入完整路径前往。",
   "color-title": "颜色",
   "color-basic": "基本颜色",
   "color-custom": "自定义颜色",
