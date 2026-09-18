@@ -4,7 +4,7 @@
 
 `VSRmlUi` is a client-side UI foundation for [Vintage Story](https://www.vintagestory.at/). It exposes RmlUi documents through a small C# API, so mods can build windows, modal dialogs, and HUDs with RML and RCSS.
 
-The current release is **1.0.0**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The local folder-browser build includes `win-x64` and `linux-x64`. Local macOS binaries have an older source fingerprint and need rebuilding and verification on their target platforms before inclusion. The official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
+The current release is **1.0.1**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The local folder-browser build includes `win-x64` and `linux-x64`. Local macOS binaries have an older source fingerprint and need rebuilding and verification on their target platforms before inclusion. The official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
 
 ## Features
 
@@ -20,11 +20,15 @@ Add the dependency to `modinfo.json`:
 
 ```json
 "dependencies": {
-  "vsrmlui": "1.0.0"
+  "vsrmlui": "1.0.1"
 }
 ```
 
-Reference `artifacts/sdk/VSRmlUi.dll` with `Private` set to `false`, and target the same .NET version as the game. A minimal client-side example is:
+Reference `artifacts/sdk/VSRmlUi.dll` with `Private` set to `false`, and target the same .NET version as the game.
+
+For universal mods such as VS Director, install the RmlUi dependency on both the client and server. RmlUi declares `Universal` and `requiredOnClient: true` so it appears in the client's missing-mod download list when joining a server; declaring `dependencies` alone does not add it to that download list. Automatic downloads also require the matching version to be available on the mod database. The UI runtime starts only on the client; `requiredOnServer: false` lets other client-only mods use it without a server installation.
+
+A minimal client-side example is:
 
 ```csharp
 using VSRmlUi;
@@ -65,9 +69,9 @@ Linux or macOS:
 python3 build.py --game-directory /path/to/game --rmlui-source /path/to/RmlUi
 ```
 
-The build creates `artifacts/vsrmlui_1.0.0.zip` after all native libraries are available. A successful example build also creates `artifacts/vsrmlui-test_1.0.0.zip`. Install the main mod and then the test mod; press **Ctrl+F9** (use the modifier shown by the game on macOS) in the client to open the input diagnostics window. It includes single-line and multiline text, number/select/checkbox/range controls, and an event log for IME committed text, AltGr, emoji, paste, and editing shortcuts.
+The build creates `artifacts/vsrmlui_1.0.1.zip` after all native libraries are available. A successful example build also creates `artifacts/vsrmlui-test_1.0.1.zip`. Install the main mod and then the test mod; press **Ctrl+F9** (use the modifier shown by the game on macOS) in the client to open the input diagnostics window. It includes single-line and multiline text, number/select/checkbox/range controls, and an event log for IME committed text, AltGr, emoji, paste, and editing shortcuts.
 
-The scripts build the native bridge, managed mod, example, tests, and SDK. Packaging produces `artifacts/vsrmlui_1.0.0.zip` only when all required native libraries are available. Platform-specific CI and bundling details are documented in `PLATFORMS.zh-CN.md`.
+The scripts build the native bridge, managed mod, example, tests, and SDK. Packaging produces `artifacts/vsrmlui_1.0.1.zip` only when all required native libraries are available. Platform-specific CI and bundling details are documented in `PLATFORMS.zh-CN.md`.
 
 ## Repository layout
 

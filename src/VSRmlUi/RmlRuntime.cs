@@ -32,7 +32,7 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
     internal Action? SaveColorPalette { get; set; }
     internal Func<(int Width, int Height, float Scale)> Dimensions { get; set; } = () => (1280, 720, 1);
     public bool IsAvailable { get; private set; }
-    public string Version => "1.0.0";
+    public string Version => "1.0.1";
     public string RmlUiVersion => "6.4-dev (3045e6e)";
 
     internal RmlRuntime(IRmlHost host, bool headless = false)
