@@ -43,6 +43,7 @@ Throws<ArgumentException>(() => RmlAssetPath.Normalize("demo:../../secret"), "re
 Throws<ArgumentException>(() => RmlAssetPath.Normalize("https://example.com/ui.rml"), "reject network URL assets");
 Check(KeyMap.Convert(GlKeys.A) == 12 && KeyMap.Convert(GlKeys.Number9) == 11 && KeyMap.Convert(GlKeys.BackSpace) == 69, "game key mapping");
 Check(!new RmlUiModSystem().ShouldLoad(EnumAppSide.Server), "server does not start the UI system");
+FontAssetChecks.Run(root, gameRoot, Check);
 Check(RmlControls.TryParseColor("#123456", out uint rgb) && rgb == 0x123456ff, "shared color parser supplies opaque alpha");
 Check(RmlControls.TryParseColor("#12345680", out uint rgba) && rgba == 0x12345680, "shared color parser retains RGBA alpha");
 Check(!RmlControls.TryParseColor("#GG0000", out _) && !RmlControls.TryParseColor(null, out _), "shared color parser rejects invalid values");

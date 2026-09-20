@@ -19,9 +19,16 @@ public sealed class RmlUiModSystem : ModSystem
     public override double ExecuteOrder() => 0.01;
     public override void StartPre(ICoreAPI api)
     {
-        // Fonts are not an ordinary asset category in the base game. Register before asset discovery.
+        // Register before mod asset discovery. The game's base assets are already indexed by this phase.
         if (api.Side == EnumAppSide.Client && !AssetCategory.categories.ContainsKey("fonts"))
             _ = new AssetCategory("fonts", false, EnumAppSide.Client);
+    }
+    public override void AssetsLoaded(ICoreAPI api)
+    {
+        // Include base-game fonts that were skipped before StartPre registered the category.
+        // Let the asset manager resolve physical filename casing and mod/theme overrides.
+        if (api.Side == EnumAppSide.Client)
+            api.Assets.Reload(AssetCategory.categories["fonts"]);
     }
     public override void StartClientSide(ICoreClientAPI api)
     {
@@ -37,13 +44,9 @@ public sealed class RmlUiModSystem : ModSystem
             runtime.SaveColorPalette = () => api.StoreModConfig(runtime.ColorPalette, "vsrmlui-colors.json");
             runtime.Dimensions = () => (Math.Max(1, api.Render.FrameWidth), Math.Max(1, api.Render.FrameHeight), Math.Max(0.25f, RuntimeEnv.GUIScale));
             runtime.CreateView = document => new GameDialog(api, host, document);
-            // Montserrat is not present in every Vintage Story distribution (notably
-            // dedicated/modpack installs).  A missing font must not abort the whole
-            // RmlUi runtime, otherwise Director cannot open its workspace.  Register
-            // the bundled Noto font as a reliable default and use game fonts when
-            // available.
-            TryRegisterFont(runtime, "vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-default");
-            TryRegisterFont(runtime, "game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
+            // Prefer the game's font; keep a bundled default for installs without it.
+            if (!TryRegisterFont(runtime, "game:fonts/Montserrat-Regular.ttf", "vsrmlui-default"))
+                TryRegisterFont(runtime, "vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-default");
             TryRegisterFont(runtime, "game:fonts/Montserrat-Bold.ttf", "vsrmlui-default", 700);
             TryRegisterFont(runtime, "game:fonts/Montserrat-Italic.ttf", "vsrmlui-default", italic: true);
             TryRegisterFont(runtime, "vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-cjk", fallback: true);
@@ -58,10 +61,10 @@ public sealed class RmlUiModSystem : ModSystem
         }
     }
 
-    private void TryRegisterFont(RmlRuntime runtime, string path, string family, int weight = 400, bool italic = false, bool fallback = false)
+    private bool TryRegisterFont(RmlRuntime runtime, string path, string family, int weight = 400, bool italic = false, bool fallback = false)
     {
-        try { runtime.RegisterFont(path, family, weight, italic, fallback); }
-        catch (Exception ex) { api?.Logger.Warning("[vsrmlui] Optional font {0} unavailable: {1}", path, ex.Message); }
+        try { runtime.RegisterFont(path, family, weight, italic, fallback); return true; }
+        catch (Exception ex) { api?.Logger.Warning("[vsrmlui] Optional font {0} unavailable: {1}", path, ex.Message); return false; }
     }
     private void Stop()
     {
