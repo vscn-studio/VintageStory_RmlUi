@@ -31,8 +31,8 @@ class PackagingTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_bytes(b"test fixture only")
         (self.root / "build").mkdir()
-        self.write_json("src/VSRmlUi/modinfo.json", {"version": "1.0.1"})
-        self.write_json("artifacts/managed/manifest.json", {"version": "1.0.1", "sha256": hashlib.sha256(b"test fixture only").hexdigest()})
+        self.write_json("src/VSRmlUi/modinfo.json", {"version": "1.0.2"})
+        self.write_json("artifacts/managed/manifest.json", {"version": "1.0.2", "sha256": hashlib.sha256(b"test fixture only").hexdigest()})
         for rid in build.REQUIRED:
             self.add_native(rid)
 
@@ -54,7 +54,7 @@ class PackagingTests(unittest.TestCase):
         staged = self.root / "artifacts/example"
         staged.mkdir(parents=True)
         (staged / "VSRmlUi.Example.dll").write_bytes(b"synthetic test mod")
-        self.write_json(staged / "modinfo.json", {"modid": "vsrmluiexample", "version": "1.0.1"})
+        self.write_json(staged / "modinfo.json", {"modid": "vsrmluiexample", "version": "1.0.2"})
         (staged / "assets/vsrmluiexample/dialog/input-test.rml").parent.mkdir(parents=True)
         (staged / "assets/vsrmluiexample/dialog/input-test.rml").write_text("<rml />", encoding="utf-8")
 
@@ -63,10 +63,10 @@ class PackagingTests(unittest.TestCase):
         self.add_native("osx-arm64")
         self.package()
         archives = list((self.root / "artifacts").glob("*.zip"))
-        self.assertEqual([p.name for p in archives], ["vsrmlui_1.0.1.zip"])
+        self.assertEqual([p.name for p in archives], ["vsrmlui_1.0.2.zip"])
         with zipfile.ZipFile(archives[0]) as z:
             self.assertIsNone(z.testzip())
-            self.assertEqual(json.loads(z.read("modinfo.json"))["version"], "1.0.1")
+            self.assertEqual(json.loads(z.read("modinfo.json"))["version"], "1.0.2")
             self.assertEqual(set(z.namelist()), {"VSRmlUi.dll", "modinfo.json", "modicon.png", "LICENSE", "COPYRIGHT.txt", "licenses/MIT", "assets/test.txt", "native/win-x64/vsrmlui_native.dll", "native/linux-x64/libvsrmlui_native.so", "native/osx-x64/libvsrmlui_native.dylib", "native/osx-arm64/libvsrmlui_native.dylib"})
 
     def test_missing_linux_refuses_partial_archive(self):
@@ -82,12 +82,12 @@ class PackagingTests(unittest.TestCase):
 
     def test_wrong_managed_version_is_rejected(self):
         self.write_json("artifacts/managed/manifest.json", {"version": "0.1.1"})
-        with self.assertRaisesRegex(RuntimeError, "does not match 1.0.1"):
+        with self.assertRaisesRegex(RuntimeError, "does not match 1.0.2"):
             self.package()
 
     def test_failed_update_preserves_existing_release(self):
         self.package()
-        release = self.root / "artifacts/vsrmlui_1.0.1.zip"
+        release = self.root / "artifacts/vsrmlui_1.0.2.zip"
         original = release.read_bytes()
         (self.root / "artifacts/native/linux-x64/libvsrmlui_native.so").unlink()
         with self.assertRaises(RuntimeError):
@@ -96,15 +96,15 @@ class PackagingTests(unittest.TestCase):
 
     def test_windows_linux_release_without_mac(self):
         self.package()
-        with zipfile.ZipFile(self.root / "artifacts/vsrmlui_1.0.1.zip") as z:
+        with zipfile.ZipFile(self.root / "artifacts/vsrmlui_1.0.2.zip") as z:
             self.assertIn("native/win-x64/vsrmlui_native.dll", z.namelist())
             self.assertIn("native/linux-x64/libvsrmlui_native.so", z.namelist())
 
     def test_input_diagnostics_archive_is_separate(self):
         self.add_example()
         self.package()
-        self.assertEqual(sorted(p.name for p in (self.root / "artifacts").glob("*.zip")), ["vsrmlui-test_1.0.1.zip", "vsrmlui_1.0.1.zip"])
-        with zipfile.ZipFile(self.root / "artifacts/vsrmlui-test_1.0.1.zip") as z:
+        self.assertEqual(sorted(p.name for p in (self.root / "artifacts").glob("*.zip")), ["vsrmlui-test_1.0.2.zip", "vsrmlui_1.0.2.zip"])
+        with zipfile.ZipFile(self.root / "artifacts/vsrmlui-test_1.0.2.zip") as z:
             self.assertEqual(set(z.namelist()), {"VSRmlUi.Example.dll", "modinfo.json", "LICENSE", "COPYRIGHT.txt", "licenses/MIT", "assets/vsrmluiexample/dialog/input-test.rml"})
 
 

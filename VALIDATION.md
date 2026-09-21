@@ -1,4 +1,6 @@
-# 1.0.0 release validation — 2026-09-16
+# 1.0.2 release validation notes — 2026-09-22
+
+Release 1.0.2 is a managed and packaging revision. Commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e` changes font asset rescan behavior and adds coverage, but does not change `native/`, the C ABI, linked native dependencies, or the pinned RmlUi revision. The four-platform native validation below therefore remains the applicable native baseline; a final 1.0.2 managed run should be recorded after rebuilding the managed assemblies.
 
 The current native bundle contains Windows x64, Linux x64, macOS x64, and macOS arm64. Linux x64 was rebuilt under WSL Ubuntu 24.04, Windows x64 was rebuilt with MSVC, and both passed the native C ABI smoke test. The two macOS libraries came from the successful GitHub Actions run for commit `2ea9ff7`; their architecture, dependency, signing, and native smoke steps passed on the target runners. Linux ARM64 is excluded because the official Vintage Story Linux client has no ARM64 distribution.
 

@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>VSCN-Studio</Authors>
     <Copyright>Copyright (c) 2026 VSCN-Studio</Copyright>
     <GameDirectory Condition="'$(GameDirectory)' == ''">$(MSBuildThisFileDirectory)..\Vintagestory</GameDirectory>

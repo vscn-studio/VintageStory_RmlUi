@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
 REVISION = "3045e6e3510425ef2870f7647b3f59d3ae9970f5"
 FILES = {"win": "vsrmlui_native.dll", "linux": "libvsrmlui_native.so", "osx": "libvsrmlui_native.dylib"}
 SUPPORTED = ("win-x64", "linux-x64", "osx-x64", "osx-arm64")
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 REQUIRED = ("win-x64", "linux-x64")
 
 
@@ -81,9 +81,9 @@ def package_merged(native_root):
     info = json.loads((managed / "manifest.json").read_text(encoding="utf-8"))
     dll = managed / "VSRmlUi.dll"
     if info.get("version") != VERSION or info.get("sha256") != hashlib.sha256(dll.read_bytes()).hexdigest():
-        raise RuntimeError("Managed build does not match 1.0.1. Run --prepare-only first.")
+        raise RuntimeError("Managed build does not match 1.0.2. Run --prepare-only first.")
     if json.loads((ROOT / "src/VSRmlUi/modinfo.json").read_text(encoding="utf-8"))["version"] != VERSION:
-        raise RuntimeError("modinfo.json version must be fixed at 1.0.1")
+        raise RuntimeError("modinfo.json version must be fixed at 1.0.2")
     with tempfile.TemporaryDirectory(prefix="package-", dir=ROOT / "build") as temporary:
         mod = Path(temporary)
         for name in ("VSRmlUi.dll",):
@@ -143,7 +143,7 @@ def main():
     parser.add_argument("--rid", choices=SUPPORTED, help="Defaults to host; cross compilation is rejected")
     parser.add_argument("--native-only", action="store_true", help="Build and smoke-test the C ABI without game/.NET")
     parser.add_argument("--prepare-only", action="store_true", help="Build/test and stage managed/native files without creating a ZIP")
-    parser.add_argument("--package-only", action="store_true", help="Combine staged 1.0.1 managed files and target-host native builds without recompiling")
+    parser.add_argument("--package-only", action="store_true", help="Combine staged 1.0.2 managed files and target-host native builds without recompiling")
     parser.add_argument("--skip-tests", action="store_true")
     parser.add_argument("--headless-tests", action="store_true", help="Skip only managed OpenGL checks")
     parser.add_argument("--bundle-native", type=Path, default=ROOT / "artifacts/native", help="Collected <rid>/<library> artifacts; defaults to artifacts/native")
