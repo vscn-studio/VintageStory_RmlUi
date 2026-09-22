@@ -43,7 +43,7 @@ internal static class Native
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern ulong vr_element(ulong document, ulong element, int operation, [MarshalAs(UnmanagedType.LPUTF8Str)] string? name, [MarshalAs(UnmanagedType.LPUTF8Str)] string? value);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern nint vr_get(ulong document, ulong element, int operation, [MarshalAs(UnmanagedType.LPUTF8Str)] string? name);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern unsafe int vr_query_all(ulong document, ulong element, [MarshalAs(UnmanagedType.LPUTF8Str)] string selector, ulong* output, int capacity);
-    [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int vr_font([MarshalAs(UnmanagedType.LPUTF8Str)] string path, [MarshalAs(UnmanagedType.LPUTF8Str)] string family, int weight, int italic, int fallback);
+    [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int vr_font_face([MarshalAs(UnmanagedType.LPUTF8Str)] string path, [MarshalAs(UnmanagedType.LPUTF8Str)] string family, int weight, int italic, int fallback, int faceIndex);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern ulong vr_listen(ulong document, ulong element, [MarshalAs(UnmanagedType.LPUTF8Str)] string type, int capture);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int vr_unlisten(ulong subscription);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int vr_poll(out Event result);

@@ -12,6 +12,7 @@
 #endif
 // All calls and callbacks are synchronous and confined to the initialization thread.
 // Read allocates host memory; Free releases it. Image data is premultiplied RGBA8.
+// Read kind 4 resolves a decimal Unicode scalar to a font asset path; width is its TTC face index.
 using ReadCallback = int(VR_CALL*)(int kind, const char* path, void** data, int* length, int* width, int* height);
 using FreeCallback = void(VR_CALL*)(void* data);
 using LogCallback = void(VR_CALL*)(int level, const char* message);
@@ -28,6 +29,7 @@ VR_API uint64_t VR_CALL vr_element(uint64_t document, uint64_t element, int oper
 VR_API const char* VR_CALL vr_get(uint64_t document, uint64_t element, int operation, const char* name);
 VR_API int VR_CALL vr_query_all(uint64_t document, uint64_t element, const char* selector, uint64_t* output, int capacity);
 VR_API int VR_CALL vr_font(const char* path, const char* family, int weight, int italic, int fallback);
+VR_API int VR_CALL vr_font_face(const char* path, const char* family, int weight, int italic, int fallback, int face_index);
 VR_API uint64_t VR_CALL vr_listen(uint64_t document, uint64_t element, const char* type, int capture);
 VR_API int VR_CALL vr_unlisten(uint64_t subscription);
 // Poll: 0 = empty, 1 = event, 2 = detached subscription (only subscription is set), -1 = error.

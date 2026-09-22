@@ -28,7 +28,9 @@ Reference `artifacts/sdk/VSRmlUi.dll` with `Private` set to `false`, and target 
 
 For universal mods such as VS Director, install the RmlUi dependency on both the client and server. RmlUi declares `Universal` and `requiredOnClient: true` so it appears in the client's missing-mod download list when joining a server; declaring `dependencies` alone does not add it to that download list. Automatic downloads also require the matching version to be available on the mod database. The UI runtime starts only on the client; `requiredOnServer: false` lets other client-only mods use it without a server installation.
 
-The managed release version and native artifacts are tracked independently. A commit that changes only managed code, tests, or documentation may still run the native job because of the current CI path filters, but it does not require new native files. Existing native artifacts remain valid while `native/`, the C ABI, linked dependencies, target architectures, and the pinned upstream RmlUi revision are unchanged. Rebuild native artifacts when any of those inputs change. Release 1.0.2 is based on commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`; that commit contains no native source or ABI change.
+The managed release version and native artifacts are tracked independently. A commit that changes only managed code, tests, or documentation may still run the native job because of the current CI path filters, but it does not require new native files. Existing native artifacts remain valid while `native/`, the C ABI, linked dependencies, target architectures, and the pinned upstream RmlUi revision are unchanged. Rebuild native artifacts when any of those inputs change. Release 1.0.2 is based on commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`; this release removes the bundled Noto font, adds runtime system-font fallback and TTC face-index support, and raises the native ABI to 2, so all four native artifacts must be rebuilt.
+
+The package contains no font files. Startup first uses the game's font assets; when a glyph is missing, SkiaSharp finds a local system font and passes its data to RmlUi in memory. Linux installations without a font covering the requested language log one actionable warning and render the glyph as missing until the client is restarted after installing a suitable font such as Noto CJK.
 
 A minimal client-side example is:
 
@@ -87,7 +89,7 @@ The scripts build the native bridge, managed mod, example, tests, and SDK. Packa
 
 The release packages include [COPYRIGHT.txt](COPYRIGHT.txt), the project MIT license, and the complete `licenses/` directory, including third-party attribution and license texts.
 
-Original VSRmlUi code is released under the [MIT License](LICENSE) © 2026 VSCN-Studio. RmlUi, FreeType, GLAD, Khronos headers, and Noto Sans SC are distributed under their respective licenses; see [`licenses/THIRD-PARTY.md`](licenses/THIRD-PARTY.md) and the files in `licenses/` for required notices.
+Original VSRmlUi code is released under the [MIT License](LICENSE) © 2026 VSCN-Studio. RmlUi, FreeType, GLAD, and Khronos headers are distributed under their respective licenses; see [`licenses/THIRD-PARTY.md`](licenses/THIRD-PARTY.md) and the files in `licenses/` for required notices.
 
 Vintage Story is a trademark of Anego Studios. This project is an independent mod library and is not affiliated with or endorsed by Anego Studios.
 

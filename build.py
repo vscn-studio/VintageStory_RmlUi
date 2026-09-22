@@ -22,6 +22,7 @@ FILES = {"win": "vsrmlui_native.dll", "linux": "libvsrmlui_native.so", "osx": "l
 SUPPORTED = ("win-x64", "linux-x64", "osx-x64", "osx-arm64")
 VERSION = "1.0.2"
 REQUIRED = ("win-x64", "linux-x64")
+FONT_EXTENSIONS = {".ttf", ".otf", ".ttc", ".otc", ".woff", ".woff2", ".fnt", ".bdf", ".pcf"}
 
 
 def bridge_hash():
@@ -56,6 +57,9 @@ def copy(source, destination):
 
 
 def archive(source, destination):
+    fonts = [path.relative_to(source).as_posix() for path in source.rglob("*") if path.is_file() and path.suffix.lower() in FONT_EXTENSIONS]
+    if fonts:
+        raise RuntimeError("Release packages must not contain font files: " + ", ".join(sorted(fonts)))
     # Forward-slash member names on every host. Only replace after a successful zip.
     with tempfile.NamedTemporaryFile(dir=destination.parent, suffix=".zip", delete=False) as temp:
         temporary = Path(temp.name)
@@ -80,7 +84,7 @@ def package_merged(native_root):
     managed = ROOT / "artifacts" / "managed"
     info = json.loads((managed / "manifest.json").read_text(encoding="utf-8"))
     dll = managed / "VSRmlUi.dll"
-    if info.get("version") != VERSION or info.get("sha256") != hashlib.sha256(dll.read_bytes()).hexdigest():
+    if info.get("version") != VERSION or info.get("sha256") != hashlib.sha256(dll.read_bytes()).hexdigest() or info.get("bridgeSource") != bridge_hash():
         raise RuntimeError("Managed build does not match 1.0.2. Run --prepare-only first.")
     if json.loads((ROOT / "src/VSRmlUi/modinfo.json").read_text(encoding="utf-8"))["version"] != VERSION:
         raise RuntimeError("modinfo.json version must be fixed at 1.0.2")
@@ -210,7 +214,7 @@ def main():
     for name in ("VSRmlUi.Example.dll", "modinfo.json"):
         copy(example_output / name, ROOT / "artifacts/example" / name)
     copy(example_output / "assets", ROOT / "artifacts/example/assets")
-    metadata = {"version": VERSION, "sha256": hashlib.sha256((managed / "VSRmlUi.dll").read_bytes()).hexdigest(), "managedTests": not args.skip_tests, "graphicsTests": not args.skip_tests and not args.headless_tests}
+    metadata = {"version": VERSION, "bridgeSource": bridge_hash(), "sha256": hashlib.sha256((managed / "VSRmlUi.dll").read_bytes()).hexdigest(), "managedTests": not args.skip_tests, "graphicsTests": not args.skip_tests and not args.headless_tests}
     (managed / "manifest.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     if args.prepare_only:
         print("Prepared managed/native build inputs; no release ZIP created.")

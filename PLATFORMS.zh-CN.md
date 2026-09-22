@@ -47,7 +47,7 @@ Linux 渲染器使用 `libGL.so.1` / `glXGetProcAddressARB`；原生 Wayland/EGL
 
 ## 当前交付状态
 
-1.0.2 基于 commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`。该 commit 只改动托管字体资产扫描和测试，没有修改 `native/`、桥接源码、C ABI 或固定的 RmlUi 修订，因此继续复用现有四平台 native bundle；发布时只需重新生成 1.0.2 的托管程序集和 ZIP。
+1.0.2 基于 commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`。该版本移除包内 Noto 字体，增加系统字体缺字回退和 TTC face index，并将 native ABI 升为 2；四个平台 native bundle 必须从本次源码重新构建，不能继续复用旧文件。运行时优先使用游戏字体资产，缺字时读取本机字体；Linux 没有对应 CJK 字体时会记录一次警告。
 
 版本已固定为 1.0.2。当前 native bundle 包含四个 native RID：Windows/Linux x64、macOS x64 和 macOS arm64。构建示例后会额外产生 `vsrmlui-test_1.0.2.zip`，其中的 F9 输入诊断窗口用于真实游戏内检查 IME、键盘修饰键、文本控件和鼠标操作；它依赖主模组包。旧版本 ZIP（包括旧的双平台 multi 包及示例包）移至 `build/previous-packages/`，不再放在当前发布目录中。
 

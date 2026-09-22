@@ -44,6 +44,7 @@ Throws<ArgumentException>(() => RmlAssetPath.Normalize("https://example.com/ui.r
 Check(KeyMap.Convert(GlKeys.A) == 12 && KeyMap.Convert(GlKeys.Number9) == 11 && KeyMap.Convert(GlKeys.BackSpace) == 69, "game key mapping");
 Check(!new RmlUiModSystem().ShouldLoad(EnumAppSide.Server), "server does not start the UI system");
 FontAssetChecks.Run(root, gameRoot, Check);
+SystemFontChecks.Run(root, gameRoot, Check);
 Check(RmlControls.TryParseColor("#123456", out uint rgb) && rgb == 0x123456ff, "shared color parser supplies opaque alpha");
 Check(RmlControls.TryParseColor("#12345680", out uint rgba) && rgba == 0x12345680, "shared color parser retains RGBA alpha");
 Check(!RmlControls.TryParseColor("#GG0000", out _) && !RmlControls.TryParseColor(null, out _), "shared color parser rejects invalid values");
@@ -51,7 +52,7 @@ Check(RmlControls.TryParseTime("23:59:58", out TimeSpan clock) && clock == new T
 Check(!RmlControls.TryParseTime("24:00", out _) && !RmlControls.TryParseTime("12:60", out _), "shared clock picker rejects invalid clock components");
 using (var controlsRuntime = new RmlRuntime(host, headless: true))
 {
-    controlsRuntime.RegisterFont("game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
+    controlsRuntime.ConfigureFonts("Montserrat", "zh-cn", host.FontAssets);
     using var controls = controlsRuntime.LoadDocumentFromString("test", "<rml><head></head><body>" + RmlControls.ColorPicker("color", "#FF0000") + RmlControls.TimePicker("clock", new TimeSpan(1, 2, 3)) + "</body></rml>", "test:dialog/controls.rml");
     string editedColor = ""; TimeSpan editedTime = TimeSpan.Zero;
     RmlDocument? colorDialog = null;
@@ -69,8 +70,7 @@ using (var controlsRuntime = new RmlRuntime(host, headless: true))
 for (int cycle = 0; cycle < 3; cycle++)
 {
     using var ui = new RmlRuntime(host, headless: true);
-    ui.RegisterFont("game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
-    ui.RegisterFont("vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-cjk", fallback: true);
+    ui.ConfigureFonts("Montserrat", "zh-cn", host.FontAssets);
     using var document = ui.LoadDocumentFromString("test", """
         <rml><head><link type="text/rcss" href="vsrmlui:dialog/theme.rcss" /></head>
         <body><div id="content"><button id="button">Click</button><input id="entry" class="text" type="text" value="hello" /></div></body></rml>
@@ -159,9 +159,7 @@ if (!args.Contains("--headless"))
     {
         Check(Snapshot() == before, "OpenGL state preserved across initialization");
         ui.Dimensions = () => (1000, 800, 1);
-        ui.RegisterFont("game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
-        ui.RegisterFont("game:fonts/Montserrat-Bold.ttf", "vsrmlui-default", 700);
-        ui.RegisterFont("vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-cjk", fallback: true);
+        ui.ConfigureFonts("Montserrat", "zh-cn", host.FontAssets);
         using var document = ui.LoadDocument("vsrmluiexample", "vsrmluiexample:dialog/example.rml");
         document.Show();
         GL.ClearColor(0.07f, 0.09f, 0.08f, 1); GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
@@ -186,6 +184,10 @@ if (!args.Contains("--headless"))
         inputDiagnostics.Close();
         document.Close(); document.Dispose();
         Check(Snapshot() == before, "OpenGL state preserved across document destruction");
+        SystemFontChecks.Render(ui, framebuffer.Pixels, () =>
+        {
+            GL.ClearColor(0, 0, 0, 1); GL.Clear(ClearBufferMask.ColorBufferBit);
+        }, Check);
         using var imageDoc = ui.LoadDocumentFromString("test", """
             <rml><head><style>body { width: 100%; height: 100%; } img { position:absolute; left:10px; top:10px; width:40px; height:40px; }</style></head>
             <body><img src="pixels.png" /></body></rml>
@@ -203,9 +205,7 @@ if (consumerAssets is not null)
 {
     host.DirectorAssets = Path.GetFullPath(consumerAssets);
     using var ui = new RmlRuntime(host, headless: true);
-    ui.RegisterFont("game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
-    ui.RegisterFont("game:fonts/Montserrat-Bold.ttf", "vsrmlui-default", 700);
-    ui.RegisterFont("vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-cjk", fallback: true);
+    ui.ConfigureFonts("Montserrat", "zh-cn", host.FontAssets);
     foreach (var file in Directory.GetFiles(Path.Combine(host.DirectorAssets, "dialog"), "*.rml"))
     {
         using var document = ui.LoadDocument("vsdirector", "vsdirector:dialog/" + Path.GetFileName(file));
@@ -247,6 +247,7 @@ static void SavePng(string path, byte[] pixels, int width, int height)
 
 sealed class TestHost(string root, string gameRoot) : IRmlHost
 {
+    public IEnumerable<byte[]> FontAssets => Directory.EnumerateFiles(Path.Combine(gameRoot, "assets/game/fonts"), "*.ttf").Select(File.ReadAllBytes);
     public string? DirectorAssets { get; set; }
     public List<(int Level, string Text)> Messages { get; } = [];
     public byte[] ReadAsset(string path)

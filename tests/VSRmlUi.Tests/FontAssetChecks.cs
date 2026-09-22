@@ -20,7 +20,8 @@ internal static class FontAssetChecks
             var messages = new List<string>();
             var logger = Proxy<ILogger>((method, args) =>
             {
-                if (method.Name is "Error" or "Warning") messages.Add(args?[0]?.ToString() ?? "");
+                if (method.Name is "Error" or "Warning")
+                    messages.Add(args is [string format, object[] values] ? string.Format(format, values) : args?[0]?.ToString() ?? "");
                 return null;
             });
             var api = Proxy<ICoreClientAPI>((method, _) => method.Name switch
@@ -49,21 +50,16 @@ internal static class FontAssetChecks
                     && host.ReadAsset(path.ToLowerInvariant()).SequenceEqual(expected),
                     "game asset host loads real font with either asset-path casing: " + Path.GetFileName(file));
             }
-            check(host.ReadAsset("vsrmlui:fonts/NotoSansCJKsc-Regular.otf").Length > 0,
-                "font rescan preserves bundled CJK assets");
             using (var runtime = new RmlRuntime(host, headless: true))
             {
-                runtime.RegisterFont("game:fonts/Montserrat-Regular.ttf", "vsrmlui-default");
-                runtime.RegisterFont("game:fonts/Montserrat-Bold.ttf", "vsrmlui-default", 700);
-                runtime.RegisterFont("game:fonts/Montserrat-Italic.ttf", "vsrmlui-default", italic: true);
-                runtime.RegisterFont("vsrmlui:fonts/NotoSansCJKsc-Regular.otf", "vsrmlui-cjk", fallback: true);
+                SystemFontResolver.Register(runtime, api);
                 using var document = runtime.LoadDocumentFromString("fontchecks",
                     "<rml><head><style>body { font-family: vsrmlui-default; font-size: 18px; }</style></head>"
                     + "<body>Regular 中文 <span style='font-weight: bold;'>Bold</span> <span style='font-style: italic;'>Italic</span></body></rml>",
                     "fontchecks:dialog/fonts.rml");
                 document.Show();
                 document.Call(3, 800, 600, 1);
-                check(messages.Count == 0, "real native font loading and layout produce no resource or font warnings");
+                check(messages.Count == 0, "system font loading and layout produce no resource or font warnings: " + string.Join("; ", messages));
             }
 
             byte[] overridden = File.ReadAllBytes(Path.Combine(gameRoot, "assets/game/fonts/Lora-Regular.ttf"));

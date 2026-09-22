@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace VSRmlUi;
@@ -24,6 +25,9 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
     private readonly Dictionary<ulong, RmlDocument> documents = [];
     private readonly Dictionary<ulong, Subscription> subscriptions = [];
     private readonly HashSet<string> fonts = [];
+    private readonly Dictionary<string, byte[]> virtualFonts = new(StringComparer.Ordinal);
+    private readonly Dictionary<byte[], string> fontPaths = [];
+    private SystemFontResolver? systemFonts;
     private readonly Dictionary<object, RmlDocument> hosts = new(ReferenceEqualityComparer.Instance);
     private bool draining;
     private bool disposing;
@@ -39,7 +43,7 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
     {
         this.host = host;
         callbacks = new() { Read = Read, Free = Marshal.FreeHGlobal, Log = Log, Write = Write };
-        if (Native.vr_abi() != 1) throw new RmlUiException("The managed and native RmlUi versions do not match.");
+        if (Native.vr_abi() != 2) throw new RmlUiException("The managed and native RmlUi versions do not match.");
         if (Native.vr_init(in callbacks, headless ? 1 : 0) == 0) { Native.Check(); throw new RmlUiException("RmlUi initialization failed."); }
         IsAvailable = true;
     }
@@ -70,13 +74,40 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
         return document;
     }
     public void RegisterFont(string assetPath, string family, int weight = 400, bool italic = false, bool fallback = false)
+        => RegisterFont(assetPath, family, weight, italic, fallback, 0);
+    public void RegisterFont(string assetPath, string family, int weight, bool italic, bool fallback, int faceIndex)
     {
         CheckThread(); ArgumentException.ThrowIfNullOrWhiteSpace(family);
         if (weight is < 1 or > 1000) throw new ArgumentOutOfRangeException(nameof(weight));
+        if (faceIndex < 0) throw new ArgumentOutOfRangeException(nameof(faceIndex));
         string path = RmlAssetPath.Normalize(assetPath);
-        string key = $"{path}|{family}|{weight}|{italic}|{fallback}";
+        string key = $"{path}|{family}|{weight}|{italic}|{fallback}|{faceIndex}";
         if (fonts.Contains(key)) return;
-        Native.vr_font(path, family, weight, italic ? 1 : 0, fallback ? 1 : 0); Native.Check(); fonts.Add(key);
+        Native.vr_font_face(path, family, weight, italic ? 1 : 0, fallback ? 1 : 0, faceIndex); Native.Check(); fonts.Add(key);
+    }
+    internal void RegisterFontData(byte[] data, string family, int weight = 400, bool italic = false, bool fallback = false, int faceIndex = 0)
+    {
+        CheckThread(); ArgumentNullException.ThrowIfNull(data);
+        if (data.Length == 0) throw new ArgumentException("Font data must not be empty.", nameof(data));
+        string path = FontPath(data);
+        bool added = virtualFonts.TryAdd(path, data);
+        try { RegisterFont(path, family, weight, italic, fallback, faceIndex); }
+        catch { if (added) virtualFonts.Remove(path); throw; }
+    }
+    private string FontPath(byte[] data)
+    {
+        if (!fontPaths.TryGetValue(data, out string? path))
+            fontPaths[data] = path = "vsrmluisystem:fonts/" + Convert.ToHexString(SHA256.HashData(data)).ToLowerInvariant() + ".font";
+        return path;
+    }
+    internal void ConfigureFonts(string? preferred, string? locale, IEnumerable<byte[]> assets,
+        Func<int, SkiaSharp.SKTypeface?>? matchCharacter = null)
+    {
+        CheckThread();
+        if (systemFonts is not null) throw new InvalidOperationException("Fonts are already configured for this world.");
+        var resolver = new SystemFontResolver(preferred, locale, assets, Log, matchCharacter);
+        try { resolver.RegisterDefaults(this); systemFonts = resolver; }
+        catch { resolver.Dispose(); throw; }
     }
     public void CloseAll(string ownerModId) { CheckThread(); foreach (var d in documents.Values.Where(d => d.OwnerModId == ownerModId).ToArray()) if (!d.IsDisposed) d.Close(); }
     public void ReleaseAll(string ownerModId) { CheckThread(); foreach (var d in documents.Values.Where(d => d.OwnerModId == ownerModId).ToArray()) d.Dispose(); }
@@ -135,10 +166,22 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
             byte[] bytes;
             switch (kind)
             {
-                case 0: bytes = host.ReadAsset(RmlAssetPath.Normalize(path)); break;
+                case 0:
+                    string assetPath = RmlAssetPath.Normalize(path);
+                    bytes = virtualFonts.TryGetValue(assetPath, out var virtualData) ? virtualData : host.ReadAsset(assetPath);
+                    break;
                 case 1: (bytes, width, height) = host.ReadImage(RmlAssetPath.Normalize(path)); break;
                 case 2: bytes = Encoding.UTF8.GetBytes(host.Translate(path)); break;
                 case 3: bytes = Encoding.UTF8.GetBytes(host.Clipboard); break;
+                case 4:
+                    if (systemFonts is null || !int.TryParse(path, out int character) || !Rune.IsValid(character)) return 0;
+                    var font = systemFonts.Resolve(character);
+                    if (font is null) return 0;
+                    string fontPath = FontPath(font.Value.Bytes);
+                    virtualFonts.TryAdd(fontPath, font.Value.Bytes);
+                    bytes = Encoding.UTF8.GetBytes(fontPath);
+                    width = font.Value.FaceIndex;
+                    break;
                 default: throw new ArgumentOutOfRangeException(nameof(kind));
             }
             length = bytes.Length; data = Marshal.AllocHGlobal(Math.Max(1, length)); Marshal.Copy(bytes, 0, data, length); return 1;
@@ -162,6 +205,9 @@ internal sealed class RmlRuntime : IRmlUiService, IDisposable
         CheckThread(); disposing = true;
         foreach (var document in documents.Values.ToArray()) document.Dispose();
         Native.vr_shutdown(); Native.Check(); IsAvailable = false;
+        virtualFonts.Clear();
+        fontPaths.Clear();
+        systemFonts?.Dispose(); systemFonts = null;
         GC.KeepAlive(callbacks);
     }
     private sealed class Subscription(RmlRuntime runtime, ulong id, RmlDocument document, Action<RmlEvent> callback) : IDisposable

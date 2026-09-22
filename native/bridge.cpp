@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace Rml;
@@ -25,6 +26,8 @@ bool initialized = false, headless_mode = false;
 std::thread::id owner_thread;
 uint64_t next_id = 1; // Never reuse handles, including across shutdown/reinitialization.
 GLuint target_framebuffer = 0;
+std::unordered_set<uint32_t> resolved_characters;
+std::unordered_set<String> system_font_faces;
 String asset_url(const String& path) {
     // RmlUi intentionally uses '|' as an escaped colon in file paths. Unlike
     // a URI authority, this survives URL::GetPath() inside ElementImage.
@@ -212,13 +215,26 @@ void destroy_document(uint64_t id) {
 }
 }
 unsigned int vsrml_target_framebuffer() { return target_framebuffer; }
-int VR_CALL vr_abi() { return 1; }
+void vsrml_resolve_font(uint32_t character) {
+    if (!resolved_characters.insert(character).second) return;
+    try {
+        HostBuffer buffer(4, std::to_string(character).c_str());
+        if (!buffer.data || buffer.length <= 0 || buffer.width < 0) return;
+        auto path = buffer.text();
+        auto family = path + "/" + std::to_string(buffer.width);
+        if (!system_font_faces.insert(family).second) return;
+        if (!LoadFontFace(asset_url(path), family, Style::FontStyle::Normal, Style::FontWeight::Normal, true, buffer.width))
+            Log::Message(Log::LT_WARNING, "Unable to load system fallback font for U+%04X.", character);
+    } catch (const std::exception& e) { Log::Message(Log::LT_WARNING, "System font fallback failed: %s", e.what()); }
+}
+int VR_CALL vr_abi() { return 2; }
 const char* VR_CALL vr_error() { return error.c_str(); }
 int VR_CALL vr_init(const Callbacks* callbacks, int headless) {
     return guard([&]() {
         if (initialized) throw std::runtime_error("Only one VSRmlUi runtime may be active.");
         if (!callbacks || !callbacks->read || !callbacks->free || !callbacks->log || !callbacks->write) throw std::runtime_error("Missing host callbacks.");
         host = *callbacks; headless_mode = headless != 0;
+        resolved_characters.clear(); system_font_faces.clear();
         if (!headless_mode && !RmlGL3::Initialize()) throw std::runtime_error("OpenGL 3.3 initialization failed; a current game context is required.");
         GLState state;
         try {
@@ -334,8 +350,12 @@ int VR_CALL vr_query_all(uint64_t id, uint64_t handle, const char* selector, uin
     return guard([&]() { check_thread(); if (!output || capacity < 0) throw std::runtime_error("Invalid query output buffer."); auto& d = doc(id); auto* e = element(d, handle); ElementList matches; e->QuerySelectorAll(matches, selector ? selector : ""); int count = std::min<int>(capacity, static_cast<int>(matches.size())); for (int i = 0; i < count; ++i) output[i] = remember(d, matches[i]); return static_cast<int>(matches.size()); }, -1);
 }
 int VR_CALL vr_font(const char* path, const char* family, int weight, int italic, int fallback) {
+    return vr_font_face(path, family, weight, italic, fallback, 0);
+}
+int VR_CALL vr_font_face(const char* path, const char* family, int weight, int italic, int fallback, int face_index) {
     return guard([&]() { check_thread(); GLState state;
-        if (!LoadFontFace(asset_url(path), family, italic ? Style::FontStyle::Italic : Style::FontStyle::Normal, static_cast<Style::FontWeight>(weight), fallback != 0)) throw std::runtime_error("Unable to load font."); return 1;
+        if (face_index < 0) throw std::runtime_error("Invalid font face index.");
+        if (!LoadFontFace(asset_url(path), family, italic ? Style::FontStyle::Italic : Style::FontStyle::Normal, static_cast<Style::FontWeight>(weight), fallback != 0, face_index)) throw std::runtime_error("Unable to load font."); return 1;
     }, 0);
 }
 uint64_t VR_CALL vr_listen(uint64_t id, uint64_t handle, const char* type, int capture) {

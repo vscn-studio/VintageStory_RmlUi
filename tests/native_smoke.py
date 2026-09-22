@@ -39,6 +39,7 @@ get = bind("vr_get", c.c_char_p, c.c_uint64, c.c_uint64, c.c_int, c.c_char_p)
 listen = bind("vr_listen", c.c_uint64, c.c_uint64, c.c_uint64, c.c_char_p, c.c_int)
 poll = bind("vr_poll", c.c_int, c.POINTER(Event))
 event_value = bind("vr_event_value", c.c_char_p, c.c_int)
+font_face = bind("vr_font_face", c.c_int, c.c_char_p, c.c_char_p, c.c_int, c.c_int, c.c_int, c.c_int)
 buffers = {}
 messages = []
 markup = '<rml><body><input id="entry" type="text" value="中文"/><button id="button"/></body></rml>'.encode()
@@ -68,9 +69,11 @@ def check(condition, message):
         raise RuntimeError(f"{message}: {error()!r}; logs={messages}")
 
 
-check(abi() == 1, "ABI version")
+check(abi() == 2, "ABI version")
 for cycle in range(3):
     check(init(c.byref(callbacks), 1) == 1, "headless initialization")
+    check(font_face(b"smoke:fonts/missing.ttc", b"test", 400, 0, 0, -1) == 0
+          and b"face index" in error(), "invalid collection index rejected")
     document = load(b"smoke:dialog/test.rml", None, 800, 600, 1.0)
     check(document != 0, "file callback/document load")
     entry = element(document, 0, 0, b"entry", None)

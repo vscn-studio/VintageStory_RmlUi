@@ -44,6 +44,8 @@ public interface IRmlUiService
     RmlDocument LoadDocument(string ownerModId, string assetPath, RmlDocumentOptions? options = null);
     RmlDocument LoadDocumentFromString(string ownerModId, string markup, string sourcePath, RmlDocumentOptions? options = null);
     void RegisterFont(string assetPath, string family, int weight = 400, bool italic = false, bool fallback = false);
+    /// <summary>Registers a specific face from a TTC/OTC font collection.</summary>
+    void RegisterFont(string assetPath, string family, int weight, bool italic, bool fallback, int faceIndex);
     void CloseAll(string ownerModId);
     void ReleaseAll(string ownerModId);
     bool TryGetDocument(object host, out RmlDocument? document);

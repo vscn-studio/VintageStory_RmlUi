@@ -32,7 +32,7 @@ class PackagingTests(unittest.TestCase):
             p.write_bytes(b"test fixture only")
         (self.root / "build").mkdir()
         self.write_json("src/VSRmlUi/modinfo.json", {"version": "1.0.2"})
-        self.write_json("artifacts/managed/manifest.json", {"version": "1.0.2", "sha256": hashlib.sha256(b"test fixture only").hexdigest()})
+        self.write_json("artifacts/managed/manifest.json", {"version": "1.0.2", "bridgeSource": build.bridge_hash(), "sha256": hashlib.sha256(b"test fixture only").hexdigest()})
         for rid in build.REQUIRED:
             self.add_native(rid)
 
@@ -78,6 +78,40 @@ class PackagingTests(unittest.TestCase):
     def test_modified_native_is_rejected(self):
         (self.root / "artifacts/native/win-x64/vsrmlui_native.dll").write_bytes(b"modified")
         with self.assertRaisesRegex(RuntimeError, "manifest mismatch"):
+            self.package()
+
+    def test_stale_bridge_is_rejected(self):
+        manifest_path = self.root / "artifacts/native/win-x64/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["bridgeSource"] = "previous bridge ABI"
+        self.write_json(manifest_path, manifest)
+        with self.assertRaisesRegex(RuntimeError, "manifest mismatch"):
+            self.package()
+
+    def test_same_version_managed_with_old_bridge_is_rejected(self):
+        manifest_path = self.root / "artifacts/managed/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest.pop("bridgeSource")
+        self.write_json(manifest_path, manifest)
+        with self.assertRaisesRegex(RuntimeError, "Run --prepare-only"):
+            self.package()
+
+    def test_fonts_are_rejected_before_replacing_release(self):
+        self.package()
+        release = self.root / "artifacts/vsrmlui_1.0.2.zip"
+        original = release.read_bytes()
+        for extension in build.FONT_EXTENSIONS:
+            font = self.root / "src/VSRmlUi/assets" / ("leftover" + extension.upper())
+            font.write_bytes(b"stale build font")
+            with self.subTest(extension=extension), self.assertRaisesRegex(RuntimeError, "must not contain font files"):
+                self.package()
+            self.assertEqual(release.read_bytes(), original)
+            font.unlink()
+
+    def test_stale_example_font_is_rejected(self):
+        self.add_example()
+        (self.root / "artifacts/example/assets/stale.otf").write_bytes(b"stale build font")
+        with self.assertRaisesRegex(RuntimeError, "must not contain font files"):
             self.package()
 
     def test_wrong_managed_version_is_rejected(self):
