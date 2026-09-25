@@ -193,8 +193,49 @@ internal sealed class SystemFontResolver : IDisposable
         using var style = new SKFontStyle(weight, (int)SKFontStyleWidth.Normal, italic ? SKFontStyleSlant.Italic : SKFontStyleSlant.Upright);
         var system = SKFontManager.Default.MatchFamily(family, style);
         if (system is not null && !system.FamilyName.Equals(family, StringComparison.OrdinalIgnoreCase)) { system.Dispose(); system = null; }
-        return AddSystem(system) ?? asset;
+        return AddSystem(system) ?? FindSystemFile(family, weight, italic) ?? asset;
     }
+
+    private Face? FindSystemFile(string family, int weight, bool italic)
+    {
+        SKTypeface? best = null;
+        int bestScore = int.MaxValue;
+        foreach (string path in systemFontFiles)
+        {
+            if (rejectedSystemFiles.Contains(path)) continue;
+            try
+            {
+                byte[] bytes = File.ReadAllBytes(path);
+                using var data = SKData.CreateCopy(bytes);
+                for (int index = 0; index < 64; index++)
+                {
+                    var typeface = SKTypeface.FromData(data, index);
+                    if (typeface is null) break;
+                    if (!MatchesFamily(typeface, family)) { typeface.Dispose(); continue; }
+                    int score = Math.Abs(typeface.FontWeight - weight) + (typeface.IsItalic == italic ? 0 : 1000);
+                    if (score < bestScore)
+                    {
+                        best?.Dispose();
+                        best = typeface;
+                        bestScore = score;
+                    }
+                    else typeface.Dispose();
+                }
+            }
+            catch { rejectedSystemFiles.Add(path); }
+        }
+        return AddSystem(best);
+    }
+
+    private static bool MatchesFamily(SKTypeface typeface, string family)
+    {
+        string wanted = NormalizeFamily(family);
+        return NormalizeFamily(typeface.FamilyName) == wanted
+            || NormalizeFamily(typeface.PostScriptName) == wanted;
+    }
+
+    private static string NormalizeFamily(string value)
+        => new(value.Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant).ToArray());
 
     private Face? AddSystem(SKTypeface? typeface)
     {

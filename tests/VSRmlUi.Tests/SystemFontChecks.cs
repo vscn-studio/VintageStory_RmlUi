@@ -54,6 +54,15 @@ internal static class SystemFontChecks
             check(runtime.IsAvailable, "missing game fonts fall back to a readable system default");
         }
 
+        if (OperatingSystem.IsWindows() && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", "msyhl.ttc")))
+        {
+            var selectedHost = new FontHost();
+            using var runtime = new RmlRuntime(selectedHost, headless: true);
+            runtime.ConfigureFonts("Microsoft YaHei Light", "zh-cn", []);
+            check(selectedHost.Messages.Any(m => m.Text.Contains("Using local font 'Microsoft YaHei'")),
+                "system font aliases resolve FontSettings' Microsoft YaHei Light selection");
+        }
+
         var missingHost = new FontHost();
         int lookups = 0;
         using (var runtime = new RmlRuntime(missingHost, headless: true))
