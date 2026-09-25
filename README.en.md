@@ -1,10 +1,10 @@
 # RmlUi for Vintage Story
 
-[中文 README](README.md) · [Platform notes](PLATFORMS.zh-CN.md) · [Validation record](VALIDATION.md)
+[中文 README](README.md) · [Changelog](CHANGELOG.md) · [Platform notes](PLATFORMS.zh-CN.md) · [Validation record](VALIDATION.md)
 
 `VSRmlUi` is a client-side UI foundation for [Vintage Story](https://www.vintagestory.at/). It exposes RmlUi documents through a small C# API, so mods can build windows, modal dialogs, and HUDs with RML and RCSS.
 
-The current release is **1.0.2**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The merged package contains `win-x64`, `linux-x64`, `osx-x64`, and `osx-arm64`; the official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
+The current release is **1.0.3**, targeting Vintage Story 1.22, .NET 10, and OpenGL 3.3+. Native loading and build scripts support Windows, Linux, and macOS. The merged package contains `win-x64`, `linux-x64`, `osx-x64`, and `osx-arm64`; the official Vintage Story Linux client has no ARM64 distribution, so Linux ARM64 native is not packaged.
 
 ## Features
 
@@ -20,7 +20,7 @@ Add the dependency to `modinfo.json`:
 
 ```json
 "dependencies": {
-  "vsrmlui": "1.0.2"
+  "vsrmlui": "1.0.3"
 }
 ```
 
@@ -28,7 +28,7 @@ Reference `artifacts/sdk/VSRmlUi.dll` with `Private` set to `false`, and target 
 
 For universal mods such as VS Director, install the RmlUi dependency on both the client and server. RmlUi declares `Universal` and `requiredOnClient: true` so it appears in the client's missing-mod download list when joining a server; declaring `dependencies` alone does not add it to that download list. Automatic downloads also require the matching version to be available on the mod database. The UI runtime starts only on the client; `requiredOnServer: false` lets other client-only mods use it without a server installation.
 
-The managed release version and native artifacts are tracked independently. A commit that changes only managed code, tests, or documentation may still run the native job because of the current CI path filters, but it does not require new native files. Existing native artifacts remain valid while `native/`, the C ABI, linked dependencies, target architectures, and the pinned upstream RmlUi revision are unchanged. Rebuild native artifacts when any of those inputs change. Release 1.0.2 is based on commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`; this release removes the bundled Noto font, adds runtime system-font fallback and TTC face-index support, and raises the native ABI to 2, so all four native artifacts must be rebuilt.
+The managed release version and native artifacts are tracked independently. A commit that changes only managed code, tests, or documentation may still run the native job because of the current CI path filters, but it does not require new native files. Existing native artifacts remain valid while `native/`, the C ABI, linked dependencies, target architectures, and the pinned upstream RmlUi revision are unchanged. Rebuild native artifacts when any of those inputs change. Release 1.0.2 is based on commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`; it removes the bundled Noto font, adds runtime system-font fallback and TTC face-index support, and raises the native ABI to 2. Release 1.0.3 changes only managed code and reuses the same bridge source and four platform native libraries.
 
 The package contains no font files. Startup first uses the game's font assets; when a glyph is missing, SkiaSharp finds a local system font and passes its data to RmlUi in memory. Linux installations without a font covering the requested language log one actionable warning and render the glyph as missing until the client is restarted after installing a suitable font such as Noto CJK.
 
@@ -73,9 +73,9 @@ Linux or macOS:
 python3 build.py --game-directory /path/to/game --rmlui-source /path/to/RmlUi
 ```
 
-The build creates `artifacts/vsrmlui_1.0.2.zip` after all native libraries are available. A successful example build also creates `artifacts/vsrmlui-test_1.0.2.zip`. Install the main mod and then the test mod; press **Ctrl+F9** (use the modifier shown by the game on macOS) in the client to open the input diagnostics window. It includes single-line and multiline text, number/select/checkbox/range controls, and an event log for IME committed text, AltGr, emoji, paste, and editing shortcuts.
+The build creates `artifacts/vsrmlui_1.0.3.zip` after all native libraries are available. A successful example build also creates `artifacts/vsrmlui-test_1.0.3.zip`. Install the main mod and then the test mod; press **Ctrl+F9** (use the modifier shown by the game on macOS) in the client to open the input diagnostics window. It includes single-line and multiline text, number/select/checkbox/range controls, and an event log for IME committed text, AltGr, emoji, paste, and editing shortcuts.
 
-The scripts build the native bridge, managed mod, example, tests, and SDK. Packaging produces `artifacts/vsrmlui_1.0.2.zip` only when all required native libraries are available. Platform-specific CI and bundling details are documented in `PLATFORMS.zh-CN.md`.
+The scripts build the native bridge, managed mod, example, tests, and SDK. Packaging produces `artifacts/vsrmlui_1.0.3.zip` only when all required native libraries are available. Platform-specific CI and bundling details are documented in `PLATFORMS.zh-CN.md`.
 
 ## Repository layout
 

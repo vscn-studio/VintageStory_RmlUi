@@ -1,10 +1,10 @@
 # Vintage Story RmlUi
 
-[English README](README.en.md) · [平台说明](PLATFORMS.zh-CN.md) · [验证记录](VALIDATION.md)
+[English README](README.en.md) · [更新日志](CHANGELOG.md) · [平台说明](PLATFORMS.zh-CN.md) · [验证记录](VALIDATION.md)
 
 `VSRmlUi` 是 Vintage Story 的客户端 UI 基础库。它通过 C# API 接入 RmlUi，让模组使用 RML 和 RCSS 制作窗口、模态对话框和 HUD。
 
-当前版本为 **1.0.2**，目标环境为 Vintage Story 1.22、.NET 10 和 OpenGL 3.3+。构建流程支持 Windows、Linux、macOS；合并包包含 `win-x64`、`linux-x64`、`osx-x64` 和 `osx-arm64`。官方 Vintage Story Linux 客户端没有 ARM64 发行版，因此不打包 Linux ARM64 native。
+当前版本为 **1.0.3**，目标环境为 Vintage Story 1.22、.NET 10 和 OpenGL 3.3+。构建流程支持 Windows、Linux、macOS；合并包包含 `win-x64`、`linux-x64`、`osx-x64` 和 `osx-arm64`。官方 Vintage Story Linux 客户端没有 ARM64 发行版，因此不打包 Linux ARM64 native。
 
 ## 接入模组
 
@@ -12,7 +12,7 @@
 
 ```json
 "dependencies": {
-  "vsrmlui": "1.0.2"
+  "vsrmlui": "1.0.3"
 }
 ```
 
@@ -20,7 +20,7 @@
 
 对于 VS Director 等双端模组，客户端和服务器都需要安装 RmlUi 前置包。RmlUi 声明为 `Universal` 且 `requiredOnClient: true`，以便进服时进入客户端缺失模组下载清单；仅声明 `dependencies` 不会让进服下载流程自动补齐此前置。自动下载还需要模组库提供对应版本。UI 运行时只在客户端启动；`requiredOnServer: false` 允许其他纯客户端模组在服务器未安装 RmlUi 时使用它。
 
-版本号和 native 文件独立管理。普通托管代码、测试或文档 commit 可能因为当前 CI 的路径触发规则而运行 native job，但这只是重新执行构建，不代表必须替换 native 文件。只要 `native/`、C ABI、链接依赖、目标架构和固定的上游 RmlUi 修订没有变化，就可以复用已有 native 产物；修改这些内容时才需要重新构建并更新对应平台文件。1.0.2 基于 commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`，本次加入系统字体运行时回退，native ABI 升为 2，因此四个平台 native 都必须使用本次重新构建的文件。
+版本号和 native 文件独立管理。普通托管代码、测试或文档 commit 可能因为当前 CI 的路径触发规则而运行 native job，但这只是重新执行构建，不代表必须替换 native 文件。只要 `native/`、C ABI、链接依赖、目标架构和固定的上游 RmlUi 修订没有变化，就可以复用已有 native 产物；修改这些内容时才需要重新构建并更新对应平台文件。1.0.2 基于 commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`，加入系统字体运行时回退并将 native ABI 升为 2。1.0.3 只改动托管代码，继续使用相同桥接源码和四个平台的原生库。
 
 发行包不再携带 Noto 或其他字体文件。启动时优先读取游戏字体资产；遇到缺字时由 SkiaSharp 在本机字体中查找覆盖该 Unicode 字符的字体，并以内存数据交给 RmlUi。TTC/OTC 字体的 face index 会一并保留。Linux 主机若没有覆盖所需语言的系统字体，会记录一次可操作的警告并显示缺字；安装对应字体（例如 Noto CJK）后重启客户端即可。
 
@@ -86,7 +86,7 @@ Linux/macOS：
 python3 build.py --game-directory /path/to/game --rmlui-source /path/to/RmlUi
 ```
 
-构建脚本会生成原生桥接、基础模组、示例和 SDK；所有原生库齐全后会生成 `artifacts/vsrmlui_1.0.2.zip`。如果示例也成功构建，还会生成可单独安装的 `artifacts/vsrmlui-test_1.0.2.zip`。先安装主模组，再安装测试模组；进入客户端后按 **Ctrl+F9**（macOS 使用游戏显示的对应修饰键）打开输入诊断窗口。窗口包含单行/多行文本、数字、下拉框、复选框、滑块和事件日志，可用于检查 IME 提交字符、AltGr、Emoji、粘贴以及编辑快捷键。
+构建脚本会生成原生桥接、基础模组、示例和 SDK；所有原生库齐全后会生成 `artifacts/vsrmlui_1.0.3.zip`。如果示例也成功构建，还会生成可单独安装的 `artifacts/vsrmlui-test_1.0.3.zip`。先安装主模组，再安装测试模组；进入客户端后按 **Ctrl+F9**（macOS 使用游戏显示的对应修饰键）打开输入诊断窗口。窗口包含单行/多行文本、数字、下拉框、复选框、滑块和事件日志，可用于检查 IME 提交字符、AltGr、Emoji、粘贴以及编辑快捷键。
 
 ## 许可证
 

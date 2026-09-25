@@ -1,10 +1,10 @@
-# 1.0.2 平台支持与合并包
+# 1.0.3 平台支持与合并包
 
 首版原生桥接按游戏**进程**架构加载：`win-x64`、`linux-x64`、`osx-x64` 和 `osx-arm64`。官方 Vintage Story Linux 客户端没有 ARM64 发行版，因此不提供 `linux-arm64`。Linux 使用系统 OpenGL/GLX loader；macOS 使用系统 OpenGL.framework，最低部署版本为 11.0。macOS 的 x64 进程（包括 Rosetta 下运行的游戏）加载 `osx-x64`，原生 arm64 游戏加载 `osx-arm64`。
 
 `build.py --native-only` 不需要 Vintage Story 文件，会构建原生桥接并运行 C ABI、UTF-8、事件、句柄和三次生命周期 smoke test。Windows PowerShell 用户可用 `./build.ps1 -NativeOnly`；Linux/macOS 直接使用 `python3 build.py --native-only`。完整托管测试仍需要对应平台的游戏 API、SkiaSharp 和 GLFW 文件：通过 `--game-directory` 与 `--game-native-directory` 指定。
 
-每个平台分别编译原生库作为构建中间产物，发布时输出主模组 `vsrmlui_1.0.2.zip`；示例构建成功时再输出输入诊断模组 `vsrmlui-test_1.0.2.zip`。默认收集 `artifacts/native`，也可用 `--bundle-native` 指定收集目录。本次必须包含 `win-x64` 和 `linux-x64`；其他平台如已构建验证会一并加入。缺少 Windows/Linux 时拒绝生成 ZIP。每个 native 目录的 manifest 记录 RmlUi 提交、桥接源码指纹和二进制 SHA-256，防止混用不同桥接版本。macOS 构建使用 ad-hoc codesign；是否需要额外开发者签名和公证，需按实际游戏加载方式及发行渠道验收。
+每个平台分别编译原生库作为构建中间产物，发布时输出主模组 `vsrmlui_1.0.3.zip`；示例构建成功时再输出输入诊断模组 `vsrmlui-test_1.0.3.zip`。默认收集 `artifacts/native`，也可用 `--bundle-native` 指定收集目录。本次必须包含 `win-x64` 和 `linux-x64`；其他平台如已构建验证会一并加入。缺少 Windows/Linux 时拒绝生成 ZIP。每个 native 目录的 manifest 记录 RmlUi 提交、桥接源码指纹和二进制 SHA-256，防止混用不同桥接版本。macOS 构建使用 ad-hoc codesign；是否需要额外开发者签名和公证，需按实际游戏加载方式及发行渠道验收。
 
 GitHub Actions 的 `native.yml` 配置了 Windows x64、Linux x64、macOS x64 和 macOS arm64 原生构建和上传任务，同时报告 `ldd`/`otool` 依赖。提交 `2ea9ff7` 的运行记录中四个 native job 均成功；这些任务只验证 native ABI，不等于对应平台已完成真实游戏验收。
 
@@ -49,6 +49,6 @@ Linux 渲染器使用 `libGL.so.1` / `glXGetProcAddressARB`；原生 Wayland/EGL
 
 1.0.2 基于 commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`。该版本移除包内 Noto 字体，增加系统字体缺字回退和 TTC face index，并将 native ABI 升为 2；四个平台 native bundle 必须从本次源码重新构建，不能继续复用旧文件。运行时优先使用游戏字体资产，缺字时读取本机字体；Linux 没有对应 CJK 字体时会记录一次警告。
 
-版本已固定为 1.0.2。当前 native bundle 包含四个 native RID：Windows/Linux x64、macOS x64 和 macOS arm64。构建示例后会额外产生 `vsrmlui-test_1.0.2.zip`，其中的 F9 输入诊断窗口用于真实游戏内检查 IME、键盘修饰键、文本控件和鼠标操作；它依赖主模组包。旧版本 ZIP（包括旧的双平台 multi 包及示例包）移至 `build/previous-packages/`，不再放在当前发布目录中。
+版本已更新为 1.0.3。当前 native bundle 包含四个 native RID：Windows/Linux x64、macOS x64 和 macOS arm64。1.0.3 仅改动托管代码，继续复用 ABI 2 的原生库。构建示例后会额外产生 `vsrmlui-test_1.0.3.zip`，其中的 F9 输入诊断窗口用于真实游戏内检查 IME、键盘修饰键、文本控件和鼠标操作；它依赖主模组包。
 
-CI 默认执行四平台原生构建，这些是合包输入而不是可安装的模组分包。完整合包任务需要一台配置好 Python、.NET 10、MSVC/CMake、游戏目录的 Windows self-hosted runner，标签为 `vsrmlui-packaging`，环境变量 `VS_GAME_DIRECTORY` 指向游戏安装目录。手动运行工作流并启用 `package_release`，它会等待四平台 native 任务通过，下载全部产物、构建托管 DLL 和示例，并输出 `vsrmlui_1.0.2.zip` 与 `vsrmlui-test_1.0.2.zip`。未配置该 runner 时，先运行 native 任务，再把产物下载到本机 `artifacts/native`，用 `-PackageOnly` 合包。
+CI 默认执行四平台原生构建，这些是合包输入而不是可安装的模组分包。完整合包任务需要一台配置好 Python、.NET 10、MSVC/CMake、游戏目录的 Windows self-hosted runner，标签为 `vsrmlui-packaging`，环境变量 `VS_GAME_DIRECTORY` 指向游戏安装目录。手动运行工作流并启用 `package_release`，它会等待四平台 native 任务通过，下载全部产物、构建托管 DLL 和示例，并输出 `vsrmlui_1.0.3.zip` 与 `vsrmlui-test_1.0.3.zip`。未配置该 runner 时，先运行 native 任务，再把产物下载到本机 `artifacts/native`，用 `-PackageOnly` 合包。
