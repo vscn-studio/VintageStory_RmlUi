@@ -11,14 +11,16 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
     private readonly RmlDocument document;
     private readonly GameHost host;
     private readonly Func<int> lockModifiers;
+    private readonly bool deferKeypadNavigation;
     private readonly HashSet<int> pressedKeys = [];
+    private readonly Dictionary<int, bool> pendingKeypadKeys = [];
     private readonly HashSet<int> pressedButtons = [];
     private char? highSurrogate;
     private bool disposed;
     private bool closing;
     internal GameDialog(ICoreClientAPI api, GameHost host, RmlDocument document) : this(api, host, document, KeyboardLocks.ReadModifiers) { }
-    internal GameDialog(ICoreClientAPI api, GameHost host, RmlDocument document, Func<int> lockModifiers) : base(api)
-    { this.document = document; this.host = host; this.lockModifiers = lockModifiers; document.Runtime.AttachHost(this, document); }
+    internal GameDialog(ICoreClientAPI api, GameHost host, RmlDocument document, Func<int> lockModifiers, bool? deferKeypadNavigation = null) : base(api)
+    { this.document = document; this.host = host; this.lockModifiers = lockModifiers; this.deferKeypadNavigation = deferKeypadNavigation ?? !OperatingSystem.IsWindows(); document.Runtime.AttachHost(this, document); }
     // A visible, input-disabled document is a passive HUD. Merely returning
     // false from input handlers leaves it counted in ClientMain.DialogsOpened,
     // which prevents mouse capture outside immersive mouse mode.
@@ -70,7 +72,7 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
             document.Call(15);
         }
         document.CancelInput();
-        pressedKeys.Clear(); pressedButtons.Clear(); highSurrogate = null;
+        pressedKeys.Clear(); pendingKeypadKeys.Clear(); pressedButtons.Clear(); highSurrogate = null;
         base.UnFocus();
     }
     public override void OnRenderGUI(float deltaTime)
@@ -146,6 +148,8 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
     public override void OnKeyDown(KeyEvent args)
     {
         if (args.Handled || !ShouldReceiveKeyboardEvents()) return;
+        if (deferKeypadNavigation && IsDualUseKeypadKey(args.KeyCode))
+        { pendingKeypadKeys.TryAdd(args.KeyCode, false); args.Handled = true; return; }
         int key = KeyMap.Convert((GlKeys)args.KeyCode);
         if (document.Filter(new(RmlInputKind.KeyDown, Key: args.KeyCode, Modifiers: Modifiers(args)))) { args.Handled = true; return; }
         bool consumed = false;
@@ -160,6 +164,18 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
     public override void OnKeyUp(KeyEvent args)
     {
         if (!ShouldReceiveKeyboardEvents()) return;
+        if (deferKeypadNavigation && pendingKeypadKeys.Remove(args.KeyCode, out bool producedText))
+        {
+            if (!producedText)
+            {
+                int deferredKey = KeyMap.Convert((GlKeys)args.KeyCode);
+                document.Call(9, deferredKey, Modifiers(args));
+                document.Call(10, deferredKey, Modifiers(args));
+            }
+            args.Handled = true;
+            document.Runtime.DrainEvents();
+            return;
+        }
         int key = KeyMap.Convert((GlKeys)args.KeyCode);
         bool captured = pressedKeys.Remove(key);
         if (document.Filter(new(RmlInputKind.KeyUp, Key: args.KeyCode, Modifiers: Modifiers(args)))) { args.Handled = true; return; }
@@ -176,12 +192,23 @@ internal sealed class GameDialog : GuiDialog, IDocumentView
         // while still producing a valid Unicode character.
         if (char.IsControl(args.KeyChar)) return;
         char ch = args.KeyChar;
+        if (deferKeypadNavigation && pendingKeypadKeys.Count > 0)
+        {
+            int keypadKey = pendingKeypadKeys.Keys.Last();
+            if (IsKeypadText(keypadKey, ch)) pendingKeypadKeys[keypadKey] = true;
+        }
         if (char.IsHighSurrogate(ch)) { highSurrogate = ch; args.Handled = true; return; }
         string text = char.IsLowSurrogate(ch) && highSurrogate.HasValue ? new string([highSurrogate.Value, ch]) : char.IsSurrogate(ch) ? "" : ch.ToString();
         highSurrogate = null;
         if (text.Length != 0) args.Handled = document.Call(11, text: text) != 0 || document.Call(13) != 0 || Modal;
         document.Runtime.DrainEvents();
     }
+    private static bool IsDualUseKeypadKey(int key)
+        => key is >= (int)GlKeys.Keypad0 and <= (int)GlKeys.Keypad9 or (int)GlKeys.KeypadDecimal;
+
+    private static bool IsKeypadText(int key, char ch)
+        => key == (int)GlKeys.KeypadDecimal ? ch is '.' or ','
+            : ch == '0' + key - (int)GlKeys.Keypad0;
     public override void Dispose()
     {
         if (disposed) return;

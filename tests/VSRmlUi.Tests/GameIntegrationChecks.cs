@@ -98,6 +98,26 @@ internal static class GameIntegrationChecks
             check(entry.Value == "12734", "top-row digits are independent of Num Lock");
             view.UnFocus(); numLock = true; view.Focus(); Middle(); Key(GlKeys.Keypad7); view.OnKeyPress(new KeyEvent { KeyChar = '7' });
             check(entry.Value == "12734", "lock changes while unfocused are respected without reopening the document");
+            // Linux and macOS do not expose the lock-toggle state through the
+            // game API. The host must defer dual-use keypad navigation until
+            // the committed text event proves that the key inserted a digit.
+            ui.CreateView = document => new GameDialog(api, host, document, () => 0, deferKeypadNavigation: true);
+            using var crossPlatform = ui.LoadDocumentFromString("gamechecks", "<rml><body><input id='entry' class='text' type='text' /></body></rml>", "gamechecks:dialog/cross-platform.rml");
+            var crossPlatformView = (GameDialog)crossPlatform.View!;
+            var crossPlatformEntry = crossPlatform.GetElementById("entry")!;
+            crossPlatform.Show(); crossPlatformEntry.Value = "1234"; crossPlatformEntry.Focus(); crossPlatform.Call(3, 800, 600, 1);
+            crossPlatform.Call(9, KeyMap.Convert(GlKeys.End));
+            crossPlatformView.OnKeyDown(new KeyEvent { KeyCode = (int)GlKeys.Keypad7 });
+            crossPlatformView.OnKeyPress(new KeyEvent { KeyChar = '7' });
+            crossPlatformView.OnKeyUp(new KeyEvent { KeyCode = (int)GlKeys.Keypad7 });
+            check(crossPlatformEntry.Value == "12347", "cross-platform Num Lock on keypad digit inserts text without navigation");
+            crossPlatformEntry.Value = "1234"; crossPlatformEntry.Focus(); crossPlatform.Call(3, 800, 600, 1);
+            crossPlatform.Call(9, KeyMap.Convert(GlKeys.Home));
+            crossPlatformView.OnKeyDown(new KeyEvent { KeyCode = (int)GlKeys.Keypad7 });
+            crossPlatformView.OnKeyUp(new KeyEvent { KeyCode = (int)GlKeys.Keypad7 });
+            crossPlatformView.OnKeyPress(new KeyEvent { KeyChar = 'X' });
+            check(crossPlatformEntry.Value == "X1234", "cross-platform Num Lock off keypad navigation remains available");
+            crossPlatform.Dispose();
             using var hud = ui.LoadDocumentFromString("gamechecks", "<rml><body>HUD</body></rml>", "gamechecks:dialog/hud.rml", new() { Mode = RmlWindowMode.Hud });
             hud.Show(); var hudView = (GameDialog)hud.View!;
             check(!hudView.Focused && !hudView.PrefersUngrabbedMouse && !hudView.CaptureAllInputs() && !hudView.ShouldReceiveMouseEvents(), "HUD does not capture focus, cursor or game input");
