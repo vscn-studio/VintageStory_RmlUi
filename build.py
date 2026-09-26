@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
 REVISION = "3045e6e3510425ef2870f7647b3f59d3ae9970f5"
 FILES = {"win": "vsrmlui_native.dll", "linux": "libvsrmlui_native.so", "osx": "libvsrmlui_native.dylib"}
 SUPPORTED = ("win-x64", "linux-x64", "osx-x64", "osx-arm64")
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 REQUIRED = ("win-x64", "linux-x64")
 FONT_EXTENSIONS = {".ttf", ".otf", ".ttc", ".otc", ".woff", ".woff2", ".fnt", ".bdf", ".pcf"}
 

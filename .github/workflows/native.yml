@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       package_release:
-        description: 'Build the 1.0.3 release and input-diagnostics ZIPs on a configured self-hosted Windows runner (VS_GAME_DIRECTORY required)'
+        description: 'Build the 1.0.4 release and input-diagnostics ZIPs on a configured self-hosted Windows runner (VS_GAME_DIRECTORY required)'
         type: boolean
         default: false
 permissions:
@@ -81,8 +81,8 @@ jobs:
         run: ./build.ps1 -PackageOnly -BundleNative collected-native
       - uses: actions/upload-artifact@v4
         with:
-          name: vsrmlui-1.0.3-release
+          name: vsrmlui-1.0.4-release
           path: |
-            artifacts/vsrmlui_1.0.3.zip
-            artifacts/vsrmlui-test_1.0.3.zip
+            artifacts/vsrmlui_1.0.4.zip
+            artifacts/vsrmlui-test_1.0.4.zip
           if-no-files-found: error

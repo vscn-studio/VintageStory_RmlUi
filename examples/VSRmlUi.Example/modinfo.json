@@ -2,11 +2,11 @@
   "type": "code",
   "name": "RmlUi Examples",
   "modid": "vsrmluiexample",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Press Ctrl+F8 for the RmlUi example or Ctrl+F9 for the input/IME diagnostics window.",
   "authors": ["VSCN-Studio"],
   "side": "Client",
   "requiredOnClient": false,
   "requiredOnServer": false,
-  "dependencies": {"game": "1.22.0", "vsrmlui": "1.0.3"}
+  "dependencies": {"game": "1.22.0", "vsrmlui": "1.0.4"}
 }
