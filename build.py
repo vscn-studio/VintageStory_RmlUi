@@ -34,6 +34,18 @@ def bridge_hash():
     return digest.hexdigest()
 
 
+def source_commit():
+    """Return the checked-out source commit, or empty outside a Git checkout."""
+    try:
+        return subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+
+
 def host_rid():
     os_name = {"Windows": "win", "Linux": "linux", "Darwin": "osx"}.get(platform.system())
     arch = {"AMD64": "x64", "x86_64": "x64", "aarch64": "arm64", "arm64": "arm64"}.get(platform.machine())
@@ -101,7 +113,11 @@ def package_merged(native_root):
                 continue
             manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
             binary = folder / FILES[rid.split('-')[0]]
-            if manifest.get("rid") != rid or manifest.get("rmlui") != REVISION or manifest.get("bridgeSource") != bridge_hash() or manifest.get("sha256") != hashlib.sha256(binary.read_bytes()).hexdigest():
+            expected_commit = source_commit()
+            if (manifest.get("rid") != rid or manifest.get("rmlui") != REVISION
+                    or manifest.get("bridgeSource") != bridge_hash()
+                    or (expected_commit and manifest.get("sourceCommit") != expected_commit)
+                    or manifest.get("sha256") != hashlib.sha256(binary.read_bytes()).hexdigest()):
                 raise RuntimeError(f"Native artifact manifest mismatch: {folder}")
             if not manifest.get("nativeSmoke"):
                 raise RuntimeError(f"Native ABI smoke test is required: {folder}")
@@ -189,8 +205,9 @@ def main():
     if not args.skip_tests:
         run(sys.executable, ROOT / "tests" / "native_smoke.py", native_file)
     native_stage = ROOT / "artifacts" / "native" / rid
+    shutil.rmtree(native_stage, ignore_errors=True)
     copy(native_file, native_stage / native_file.name)
-    manifest = {"rid": rid, "rmlui": revision, "bridgeSource": bridge_hash(), "sha256": hashlib.sha256(native_file.read_bytes()).hexdigest(), "nativeSmoke": not args.skip_tests}
+    manifest = {"rid": rid, "rmlui": revision, "bridgeSource": bridge_hash(), "sourceCommit": source_commit(), "sha256": hashlib.sha256(native_file.read_bytes()).hexdigest(), "nativeSmoke": not args.skip_tests}
     (native_stage / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     if args.native_only:
         return
