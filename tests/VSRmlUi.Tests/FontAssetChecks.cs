@@ -12,6 +12,7 @@ internal static class FontAssetChecks
     internal static void Run(string root, string gameRoot, Action<bool, string> check)
     {
         AssetCategory.categories.Remove("fonts", out var previousCategory);
+        AssetCategory.categories.Remove("icons", out var previousIconsCategory);
         try
         {
             // Reproduce the real cold-start order using the game's asset manager and origins.
@@ -42,6 +43,8 @@ internal static class FontAssetChecks
 
             mod.AssetsLoaded(api);
             var host = new GameHost(api);
+            check(assets.TryGet(new AssetLocation("vsrmlui:icons/tabler/search.svg")) is not null,
+                "custom icons asset category indexes bundled Tabler SVG assets");
             foreach (string file in Directory.EnumerateFiles(Path.Combine(gameRoot, "assets/game/fonts"), "*.ttf"))
             {
                 string path = "game:fonts/" + Path.GetFileName(file);
@@ -75,6 +78,8 @@ internal static class FontAssetChecks
         {
             AssetCategory.categories.Remove("fonts");
             if (previousCategory is not null) AssetCategory.categories["fonts"] = previousCategory;
+            AssetCategory.categories.Remove("icons");
+            if (previousIconsCategory is not null) AssetCategory.categories["icons"] = previousIconsCategory;
         }
     }
 

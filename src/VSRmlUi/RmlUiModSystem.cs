@@ -19,16 +19,25 @@ public sealed class RmlUiModSystem : ModSystem
     public override double ExecuteOrder() => 0.01;
     public override void StartPre(ICoreAPI api)
     {
-        // Register before mod asset discovery. The game's base assets are already indexed by this phase.
-        if (api.Side == EnumAppSide.Client && !AssetCategory.categories.ContainsKey("fonts"))
-            _ = new AssetCategory("fonts", false, EnumAppSide.Client);
+        // Register custom client asset categories before mod asset discovery.
+        // The game's base assets are already indexed by this phase.
+        if (api.Side == EnumAppSide.Client)
+        {
+            if (!AssetCategory.categories.ContainsKey("fonts"))
+                _ = new AssetCategory("fonts", false, EnumAppSide.Client);
+            if (!AssetCategory.categories.ContainsKey("icons"))
+                _ = new AssetCategory("icons", false, EnumAppSide.Client);
+        }
     }
     public override void AssetsLoaded(ICoreAPI api)
     {
         // Include base-game fonts that were skipped before StartPre registered the category.
         // Let the asset manager resolve physical filename casing and mod/theme overrides.
         if (api.Side == EnumAppSide.Client)
+        {
             api.Assets.Reload(AssetCategory.categories["fonts"]);
+            api.Assets.Reload(AssetCategory.categories["icons"]);
+        }
     }
     public override void StartClientSide(ICoreClientAPI api)
     {
