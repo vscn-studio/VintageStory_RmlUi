@@ -51,6 +51,25 @@ page.Show();
 
 All UI operations must run on the client thread. Use `api.Event.EnqueueMainThreadTask` when a background task needs to update a document. See the Chinese README and `examples/` for the complete API and resource layout.
 
+## Shared Theme
+
+Link `vsrmlui:dialog/theme.rcss` for the compact black and bright-blue tool theme. A `vs-window vs-workbench` contains a `vs-titlebar` and `vs-workbench-body`; use `vs-sidebar`, `vs-editor`, and `vs-inspector` inside the body. Add `vs-statusbar` only when status information is needed. The [workbench RML](examples/VSRmlUi.Example/assets/vsrmluiexample/dialog/example.rml) shows the full layout. A separate [tabbed tool RML](examples/VSRmlUi.Example/assets/vsrmluiexample/dialog/tabbed-tool.rml) shows terminal-style top tabs, content, and an action row.
+
+## Tabler SVG Icons
+
+The RmlUi SVG plugin is enabled and uses pinned LunaSVG 3.5.0. Tabler outline icons are available at stable paths:
+
+```rml
+<svg class="vs-icon" src="vsrmlui:icons/tabler/search.svg" aria-label="Search" />
+<svg class="vs-icon" src="vsrmlui:icons/tabler/settings.svg" aria-label="Settings" />
+```
+
+The bundled subset lives in `src/VSRmlUi/assets/vsrmlui/icons/tabler/` and includes search, settings, window controls, folders, editing, playback, download, palette and layout icons. Use a fixed `.vs-icon` size and place icons in `vs-icon-button`; icon buttons have no resting border and show a surface only on hover. License notices for LunaSVG and Tabler are included with the project.
+
+C# code can use stable constants such as `RmlIcons.Search`, `RmlIcons.Settings`, and `RmlIcons.Close` when composing RML instead of repeating path strings.
+
+Add `vs-theme-night`, `vs-theme-day`, or `vs-theme-contrast` to the window element for alternate lighting and contrast. The day theme uses gray-white surfaces and a warm brown accent. Built-in color and folder dialogs inherit the parent page's current variant. The theme also provides button variants (`vs-primary`, `vs-ghost`, `vs-danger`, `vs-icon-button`), tabs, segmented controls, toolbars, lists, and form rows. Add `active` to the selected navigation or tab item and bind the switching behavior in your mod. Link `controls.rcss` as well for the reusable color, time, and slider controls. See [preview instructions](PREVIEWS.md) for the rendered theme matrix.
+
 `RmlControls.ColorPicker` and `BindColorPicker` provide an inline swatch and hex field. Clicking the swatch opens a classic dark color dialog built entirely in RmlUi: 48 basic colors, 16 custom slots, draggable hue/saturation spectrum and luminance strip, synchronized RGB/HSL/HEX fields, alpha slider, and original/new previews. OK commits the draft; Cancel or Escape discards it. Custom slots are saved separately in `ModConfig/vsrmlui-colors.json`. Pass `allowAlpha: false` for RGB-only fields, or use `RmlColorDialog.Show(parent, hex, accepted, allowAlpha)` directly. The optional `dialogOpened` callback exposes the child document for host window-stack integration. No Windows native dialog is invoked.
 
 ## Folder browser

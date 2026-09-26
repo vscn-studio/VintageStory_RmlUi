@@ -46,6 +46,7 @@ Check(!new RmlUiModSystem().ShouldLoad(EnumAppSide.Server), "server does not sta
 FontAssetChecks.Run(root, gameRoot, Check);
 SystemFontChecks.Run(root, gameRoot, Check);
 Check(RmlControls.TryParseColor("#123456", out uint rgb) && rgb == 0x123456ff, "shared color parser supplies opaque alpha");
+Check(RmlIcons.Search == "vsrmlui:icons/tabler/search.svg" && RmlIcons.Close == "vsrmlui:icons/tabler/x.svg", "Tabler SVG paths remain stable");
 Check(RmlControls.TryParseColor("#12345680", out uint rgba) && rgba == 0x12345680, "shared color parser retains RGBA alpha");
 Check(!RmlControls.TryParseColor("#GG0000", out _) && !RmlControls.TryParseColor(null, out _), "shared color parser rejects invalid values");
 Check(RmlControls.TryParseTime("23:59:58", out TimeSpan clock) && clock == new TimeSpan(23, 59, 58), "shared time parser supports seconds");
@@ -60,8 +61,10 @@ using (var controlsRuntime = new RmlRuntime(host, headless: true))
     RmlControls.BindTimePicker(controls, "clock", value => editedTime = value);
     var seconds = controls.GetElementById("clock-SS")!; seconds.Value = "45"; seconds.DispatchEvent("change");
     Check(editedTime == new TimeSpan(1, 2, 45) && controls.GetElementById("clock")!.Value == "01:02:45", "shared time picker binds seconds to its clock text");
+    controls.Root.SetClass("vs-theme-night", true);
     var toggle = controls.GetElementById("color-toggle")!; toggle.DispatchEvent("click");
     Check(toggle.GetAttribute("aria-expanded") == "true", "shared color picker exposes expansion state");
+    Check(colorDialog!.GetElementById("color-dialog")!.ClassNames.Contains("vs-theme-night"), "color dialog inherits the parent night theme");
     var alpha = colorDialog!.GetElementById("A")!; alpha.Value = "0"; alpha.DispatchEvent("change");
     Check(editedColor == "", "classic dialog keeps transparent alpha in the draft");
     colorDialog.GetElementById("ok")!.DispatchEvent("click");
@@ -170,18 +173,121 @@ if (!args.Contains("--headless"))
         int changed = 0;
         for (int i = 0; i < pixels.Length; i += 4) if (pixels[i] > 90 || pixels[i + 1] > 90 || pixels[i + 2] > 90) changed++;
         Check(changed > 10000, "real UI geometry and glyphs drawn into host framebuffer");
-        string screenshot = Path.Combine(root, "artifacts", "example-preview.png");
-        SavePng(screenshot, pixels, 1000, 800); Console.WriteLine("Preview: " + screenshot);
+        void Preview(RmlDocument page, string name, int viewportWidth = 1000)
+        {
+            GL.ClearColor(0.07f, 0.07f, 0.07f, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+            page.Call(3, viewportWidth, 800, 1); page.Call(4);
+            SavePng(Path.Combine(root, "artifacts", "previews", name + ".png"), framebuffer.Pixels(), 1000, 800);
+        }
+        foreach (string variant in new[] { "default", "night", "day", "contrast" })
+        {
+            foreach (string name in new[] { "night", "day", "contrast" })
+                document.GetElementById("panel")!.SetClass("vs-theme-" + name, variant == name);
+            document.GetElementById("theme")!.Value = variant;
+            Preview(document, "workbench-" + variant);
+            Preview(document, "workbench-" + variant + "-narrow", 600);
+        }
+        Console.WriteLine("Previews: " + Path.Combine(root, "artifacts", "previews"));
+        foreach (string name in new[] { "night", "day", "contrast" })
+            document.GetElementById("panel")!.SetClass("vs-theme-" + name, false);
+        document.GetElementById("theme")!.Value = "default";
         // Test actual hit testing, checkbox/range defaults and input on the rendered DOM.
         Check(document.Call(5, 1, 1) == 0, "transparent background does not capture game mouse");
         Check(document.Call(5, 200, 150) != 0, "window surface captures mouse");
+        document.Call(3, 600, 800, 1);
+        var panelBounds = document.GetElementById("panel")!.Bounds;
+        var editorBounds = document.QuerySelector(".vs-editor")!.Bounds;
+        var inspectorBounds = document.QuerySelector(".vs-inspector")!.Bounds;
+        var titleBounds = document.QuerySelector(".vs-titlebar")!.Bounds;
+        Check(panelBounds.X >= 0 && panelBounds.X + panelBounds.Width <= 600 && inspectorBounds.Y >= editorBounds.Y + editorBounds.Height,
+            "narrow viewport stacks editor and inspector inside the window");
+        Check(titleBounds.Y >= panelBounds.Y && titleBounds.Y + titleBounds.Height <= panelBounds.Y + panelBounds.Height,
+            "narrow viewport keeps the title bar visible");
+        using var toolPreview = ui.LoadDocument("vsrmluiexample", "vsrmluiexample:dialog/tabbed-tool.rml");
+        toolPreview.Show();
+        foreach (string variant in new[] { "default", "night", "day", "contrast" })
+        {
+            foreach (string name in new[] { "night", "day", "contrast" })
+                toolPreview.GetElementById("tool-panel")!.SetClass("vs-theme-" + name, variant == name);
+            toolPreview.GetElementById("tool-theme")!.Value = variant;
+            foreach (string tab in new[] { "general", "output", "advanced" })
+            {
+                toolPreview.GetElementById("tool-panel")!.SetClass("output-page", tab == "output");
+                toolPreview.GetElementById("tool-panel")!.SetClass("advanced-page", tab == "advanced");
+                foreach (string name in new[] { "general", "output", "advanced" })
+                    toolPreview.GetElementById("tab-" + name)!.SetClass("active", tab == name);
+                Preview(toolPreview, "tabbed-" + variant + "-" + tab);
+            }
+        }
+        foreach (string name in new[] { "night", "day", "contrast" })
+            toolPreview.GetElementById("tool-panel")!.SetClass("vs-theme-" + name, false);
+        toolPreview.GetElementById("tool-theme")!.Value = "default";
+        Preview(toolPreview, "tabbed-default-narrow", 600);
+        var tabs = toolPreview.QuerySelector(".vs-tabs")!.Bounds;
+        var content = toolPreview.QuerySelector(".vs-tab-content")!.Bounds;
+        Check(tabs.Y + tabs.Height <= content.Y && toolPreview.GetElementById("tab-general")!.Bounds.Width > 0,
+            "tabbed tool keeps tabs above content");
+        toolPreview.Close();
+        foreach (string variant in new[] { "default", "night", "day", "contrast" })
+        {
+            foreach (string name in new[] { "night", "day", "contrast" })
+                document.GetElementById("panel")!.SetClass("vs-theme-" + name, variant == name);
+            using var colorPreview = RmlColorDialog.Show(document, "#D08040", _ => { });
+            Preview(colorPreview.Document, "color-" + variant);
+            colorPreview.Dispose();
+        }
+        foreach (string name in new[] { "night", "day", "contrast" })
+            document.GetElementById("panel")!.SetClass("vs-theme-" + name, false);
+        using var folderPreview = ui.LoadDocumentFromString("vsrmlui", """
+            <rml><head><link type="text/rcss" href="vsrmlui:dialog/folder-dialog.rcss"/><link type="text/rcss" href="vsrmlui:dialog/dialog-theme.rcss"/></head>
+            <body><div id="folder-dialog"><div class="folder-title">选择文件夹</div>
+            <div class="folder-address"><button>上一级</button><input id="address" type="text" value="C:/Projects"/><button>前往</button></div>
+            <div class="folder-main"><div class="folder-sidebar"><button>个人文件夹</button><button>C:</button></div>
+            <div class="folder-list"><button>Exports</button><button>Projects</button><button>Textures</button></div></div>
+            <div id="message"></div><div class="folder-footer"><button>取消</button><button id="choose">选择此文件夹</button></div>
+            </div></body></rml>
+            """, "vsrmlui:dialog/folder-preview.rml");
+        folderPreview.Show();
+        foreach (string variant in new[] { "default", "night", "day", "contrast" })
+        {
+            foreach (string name in new[] { "night", "day", "contrast" })
+                folderPreview.GetElementById("folder-dialog")!.SetClass("vs-theme-" + name, variant == name);
+            Preview(folderPreview, "folder-" + variant);
+        }
+        folderPreview.Close();
+        using var modalPreview = ui.LoadDocument("vsrmluiexample", "vsrmluiexample:dialog/modal.rml");
+        modalPreview.Show();
+        foreach (string variant in new[] { "default", "night", "day", "contrast" })
+        {
+            foreach (string name in new[] { "night", "day", "contrast" })
+                modalPreview.GetElementById("box")!.SetClass("vs-theme-" + name, variant == name);
+            Preview(modalPreview, "modal-" + variant);
+        }
+        modalPreview.Close();
         document.Call(3, 1000, 800, 1.5f); document.Call(4);
         Check(GL.GetError() == ErrorCode.NoError, "GUI scale change renders correctly");
         using var inputDiagnostics = ui.LoadDocument("vsrmluiexample", "vsrmluiexample:dialog/input-test.rml");
         inputDiagnostics.Show(); inputDiagnostics.Call(3, 1000, 800, 1); inputDiagnostics.Call(4);
+        foreach (string variant in new[] { "default", "night", "day", "contrast" })
+        {
+            foreach (string name in new[] { "night", "day", "contrast" })
+                inputDiagnostics.GetElementById("panel")!.SetClass("vs-theme-" + name, variant == name);
+            Preview(inputDiagnostics, "input-diagnostics-" + variant);
+        }
         Check(inputDiagnostics.GetElementById("single")!.Value.Contains("中文"), "input diagnostics loads committed Unicode text");
         Check(inputDiagnostics.GetElementById("multiline") is not null && inputDiagnostics.GetElementById("choice") is not null, "input diagnostics exposes multiline and select controls");
         inputDiagnostics.Close();
+        using var svgDocument = ui.LoadDocumentFromString("vsrmlui", """
+            <rml><head><link type="text/rcss" href="vsrmlui:dialog/theme.rcss" /></head>
+            <body><svg id="tabler-search" class="vs-icon" src="vsrmlui:icons/tabler/search.svg" /></body></rml>
+            """, "vsrmlui:icons/svg-preview.rml");
+        svgDocument.Show();
+        svgDocument.Call(3, 1000, 800, 1); svgDocument.Call(4);
+        var iconBounds = svgDocument.GetElementById("tabler-search")!.Bounds;
+        Check(iconBounds.Width > 0 && iconBounds.Height > 0, "Tabler SVG asset resolves with intrinsic geometry");
+        Preview(svgDocument, "tabler-search");
+        svgDocument.Close();
         document.Close(); document.Dispose();
         Check(Snapshot() == before, "OpenGL state preserved across document destruction");
         SystemFontChecks.Render(ui, framebuffer.Pixels, () =>
@@ -260,8 +366,14 @@ sealed class TestHost(string root, string gameRoot) : IRmlHost
     private Dictionary<string, string>? translations;
     public string Translate(string input)
     {
-        translations ??= JsonSerializer.Deserialize<Dictionary<string, string>>(ReadAsset("vsrmluiexample:lang/zh-cn.json"))!;
-        return System.Text.RegularExpressions.Regex.Replace(input, @"\[\[vsrmluiexample:([^\]]+)\]\]", m => translations.GetValueOrDefault(m.Groups[1].Value, m.Value));
+        if (translations is null)
+        {
+            translations = new Dictionary<string, string>();
+            foreach (string domain in new[] { "vsrmluiexample", "vsrmlui" })
+                foreach (var entry in JsonSerializer.Deserialize<Dictionary<string, string>>(ReadAsset(domain + ":lang/zh-cn.json"))!)
+                    translations[domain + ":" + entry.Key] = entry.Value;
+        }
+        return System.Text.RegularExpressions.Regex.Replace(input, @"\[\[(vsrmluiexample|vsrmlui):([^\]]+)\]\]", m => translations.GetValueOrDefault(m.Groups[1].Value + ":" + m.Groups[2].Value, m.Value));
     }
     public string Clipboard { get; set; } = "";
     public string Cursor { private get; set; } = "";

@@ -5,18 +5,41 @@
   <link type="text/rcss" href="example.rcss" />
 </head>
 <body>
-  <div id="panel" class="vs-window">
-    <handle move_target="panel" id="title"><h1>RmlUi <span class="vs-muted">/ Vintage Story</span></h1></handle>
-    <p class="vs-muted">[[vsrmluiexample:intro]]</p>
-    <div class="vs-row"><label>[[vsrmluiexample:name]]</label><input id="name" class="text" type="text" value="VSCN-Studio" /></div>
-    <div class="vs-row"><label>[[vsrmluiexample:theme]]</label><select id="theme"><option value="forest">[[vsrmluiexample:forest]]</option><option value="stone">[[vsrmluiexample:stone]]</option></select></div>
-    <div class="vs-row"><label>[[vsrmluiexample:volume]]</label><input id="volume" class="range" type="range" min="0" max="100" step="1" value="50" /><span id="volume-value">50</span></div>
-    <div class="vs-row"><input id="show-hud" class="checkbox" type="checkbox" /><label for="show-hud">[[vsrmluiexample:hud]]</label></div>
-    <textarea>[[vsrmluiexample:textarea]]</textarea>
-    <p id="status">[[vsrmluiexample:ready]]</p>
-    <div class="vs-row"><button id="count">[[vsrmluiexample:count]]</button><button id="modal">[[vsrmluiexample:modal]]</button><button id="add">[[vsrmluiexample:add]]</button></div>
-    <div id="items"><p>[[vsrmluiexample:list-intro]]</p></div>
-    <div class="vs-row"><button id="close">[[vsrmluiexample:close]]</button><span class="vs-muted">Ctrl + F8 / Esc</span></div>
+  <div id="panel" class="vs-window vs-workbench">
+    <div class="vs-titlebar">
+      <handle move_target="panel"><h1>RmlUi <span class="vs-muted">/ Vintage Story</span></h1></handle>
+      <button id="close" class="vs-window-control" title="[[vsrmluiexample:close]]" aria-label="[[vsrmluiexample:close]]"><svg class="vs-icon" src="vsrmlui:icons/tabler/x.svg" /></button>
+    </div>
+    <div class="vs-workbench-body">
+      <div class="vs-sidebar">
+        <div class="vs-section-title">[[vsrmluiexample:workspace]]</div>
+        <button id="nav-editor" class="vs-nav-item active">[[vsrmluiexample:editor]]</button>
+        <button id="nav-items" class="vs-nav-item">[[vsrmluiexample:items]]</button>
+      </div>
+      <div class="vs-editor">
+        <div id="editor-view">
+          <h2>[[vsrmluiexample:editor]]</h2>
+          <div class="vs-field"><label for="name">[[vsrmluiexample:name]]</label><input id="name" class="text" type="text" value="VSCN-Studio" /></div>
+          <div class="vs-field"><label for="notes">[[vsrmluiexample:notes]]</label><textarea id="notes">[[vsrmluiexample:textarea]]</textarea></div>
+          <div class="vs-toolbar">
+            <button id="count" class="vs-primary">[[vsrmluiexample:count]]</button>
+            <button id="modal">[[vsrmluiexample:modal]]</button>
+            <button id="open-tool">[[vsrmluiexample:tool-window]]</button>
+          </div>
+        </div>
+        <div id="items-view">
+          <div class="vs-view-heading"><h2>[[vsrmluiexample:items]]</h2><button id="add" class="vs-primary">[[vsrmluiexample:add]]</button></div>
+          <div id="items" class="vs-list"><p class="vs-hint">[[vsrmluiexample:list-intro]]</p></div>
+        </div>
+      </div>
+      <div class="vs-inspector">
+        <div class="vs-section-title">[[vsrmluiexample:inspector]]</div>
+        <div class="vs-field"><label for="theme">[[vsrmluiexample:theme]]</label><select id="theme"><option value="default">[[vsrmluiexample:graphite]]</option><option value="night">[[vsrmluiexample:night]]</option><option value="day">[[vsrmluiexample:day]]</option><option value="contrast">[[vsrmluiexample:contrast]]</option></select></div>
+        <div class="vs-field"><label for="volume">[[vsrmluiexample:volume]] <span id="volume-value">50</span></label><input id="volume" class="range" type="range" min="0" max="100" step="1" value="50" /></div>
+        <div class="vs-row"><input id="show-hud" class="checkbox" type="checkbox" /><label for="show-hud">[[vsrmluiexample:hud]]</label></div>
+        <div id="status" class="vs-hint"></div>
+      </div>
+    </div>
   </div>
 </body>
 </rml>

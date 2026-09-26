@@ -21,8 +21,14 @@ set(RMLUI_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../RmlUi" CACHE PATH "Pinned 
 set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
 set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
 set(RMLUI_LUA_BINDINGS OFF CACHE BOOL "" FORCE)
-set(RMLUI_SVG_PLUGIN OFF CACHE BOOL "" FORCE)
+set(RMLUI_SVG_PLUGIN ON CACHE BOOL "" FORCE)
 set(RMLUI_LOTTIE_PLUGIN OFF CACHE BOOL "" FORCE)
+set(PLUTOVG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(lunasvg
+  URL https://github.com/sammycage/lunasvg/archive/refs/tags/v3.5.0.tar.gz
+  URL_HASH SHA256=1abf1472ee6c4d19797916e8cc3c2e4b628e0d81178ffac60bdb0d457e32c690
+  TIMEOUT 120)
+FetchContent_MakeAvailable(lunasvg)
 add_subdirectory("${RMLUI_SOURCE_DIR}" "rmlui" EXCLUDE_FROM_ALL)
 # Internal select values use the content area, leaving arrow padding clear.
 file(READ "${RMLUI_SOURCE_DIR}/Source/Core/Elements/WidgetDropDown.cpp" dropdown)

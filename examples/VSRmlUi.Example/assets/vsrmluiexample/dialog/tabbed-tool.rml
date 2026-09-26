@@ -1,0 +1,40 @@
+<rml>
+<head>
+  <title>RmlUi tool window</title>
+  <link type="text/rcss" href="vsrmlui:dialog/theme.rcss" />
+  <link type="text/rcss" href="tabbed-tool.rcss" />
+</head>
+<body>
+  <div id="tool-panel" class="vs-window vs-tabbed-window">
+    <div class="vs-titlebar">
+      <handle move_target="tool-panel"><h1>[[vsrmluiexample:tool-window]]</h1></handle>
+      <button id="tool-close" class="vs-window-control" title="[[vsrmluiexample:close]]" aria-label="[[vsrmluiexample:close]]"><svg class="vs-icon" src="vsrmlui:icons/tabler/x.svg" /></button>
+    </div>
+    <div class="vs-tabs">
+      <button id="tab-general" class="active">[[vsrmluiexample:general]]</button>
+      <button id="tab-output">[[vsrmluiexample:output]]</button>
+      <button id="tab-advanced">[[vsrmluiexample:advanced]]</button>
+    </div>
+    <div class="vs-tab-content">
+      <div id="page-general">
+        <div class="tool-group-title">[[vsrmluiexample:project-options]]</div>
+        <div class="tool-form-row"><label for="tool-name">[[vsrmluiexample:name]]</label><input id="tool-name" class="text" type="text" value="VSCN-Studio" /></div>
+        <div class="tool-form-row"><label for="tool-mode">[[vsrmluiexample:mode]]</label><select id="tool-mode"><option value="balanced">[[vsrmluiexample:balanced]]</option><option value="quality">[[vsrmluiexample:quality]]</option></select></div>
+        <div class="tool-form-row"><label for="tool-scale">[[vsrmluiexample:scale]]</label><input id="tool-scale" class="range" type="range" min="0" max="100" value="50" /><span id="tool-scale-value">50</span></div>
+        <div class="tool-check"><input id="tool-enabled" class="checkbox" type="checkbox" checked="checked" /><label for="tool-enabled">[[vsrmluiexample:enabled]]</label></div>
+      </div>
+      <div id="page-output">
+        <div class="tool-group-title">[[vsrmluiexample:output-options]]</div>
+        <div class="tool-form-row"><label for="tool-format">[[vsrmluiexample:format]]</label><select id="tool-format"><option value="png">PNG</option><option value="jpeg">JPEG</option></select></div>
+        <div class="tool-form-row"><label for="tool-quality">[[vsrmluiexample:quality]]</label><input id="tool-quality" class="range" type="range" min="1" max="100" value="85" /><span id="tool-quality-value">85</span></div>
+      </div>
+      <div id="page-advanced">
+        <div class="tool-group-title">[[vsrmluiexample:advanced-options]]</div>
+        <div class="tool-check"><input id="tool-backup" class="checkbox" type="checkbox" /><label for="tool-backup">[[vsrmluiexample:backup]]</label></div>
+        <div class="tool-form-row"><label for="tool-theme">[[vsrmluiexample:theme]]</label><select id="tool-theme"><option value="default">[[vsrmluiexample:graphite]]</option><option value="night">[[vsrmluiexample:night]]</option><option value="day">[[vsrmluiexample:day]]</option><option value="contrast">[[vsrmluiexample:contrast]]</option></select></div>
+      </div>
+    </div>
+    <div class="vs-actions"><button id="tool-cancel">[[vsrmluiexample:close]]</button><button id="tool-apply" class="vs-primary">[[vsrmluiexample:apply]]</button></div>
+  </div>
+</body>
+</rml>

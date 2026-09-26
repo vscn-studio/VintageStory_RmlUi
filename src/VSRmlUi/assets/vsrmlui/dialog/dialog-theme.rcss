@@ -1,0 +1,50 @@
+/* Shared modal surfaces; link after the dialog's structural stylesheet. */
+#color-dialog, #folder-dialog { background-color: #202020; color: #ededed; border: 1dp #4a4a4a; border-radius: 0dp; }
+.color-header, .color-footer, .folder-title, .folder-footer { background-color: #2c2c2c; border-color: #414141; }
+button { display: inline-block; vertical-align: middle; height: 30dp; padding: 0dp 10dp; line-height: 30dp; border-width: 0dp; border-radius: 0dp; background-color: #424242; text-align: center; }
+button:hover { background-color: #535353; }
+input { background-color: #111111; border-color: #626262; border-radius: 0dp; }
+button.primary, #choose { background-color: #0879df; color: #ffffff; }
+button.primary:hover, #choose:hover { background-color: #168cf2; }
+button.palette-swatch { border-radius: 0dp; }
+.folder-list { background-color: #161616; }
+.folder-list button, .folder-sidebar button { justify-content: flex-start; background-color: transparent; }
+.folder-list button:hover, .folder-sidebar button:hover { background-color: #125eaa; }
+scrollbarvertical sliderbar { border-radius: 0dp; }
+
+#color-dialog.vs-theme-night, #folder-dialog.vs-theme-night { background-color: #0f0f0f; border-color: #575757; }
+.vs-theme-night .color-header, .vs-theme-night .color-footer, .vs-theme-night .folder-title, .vs-theme-night .folder-footer { background-color: #181818; border-color: #434343; }
+.vs-theme-night button { background-color: #343434; }
+.vs-theme-night input { background-color: #080808; border-color: #777777; }
+.vs-theme-night button.primary, .vs-theme-night #choose { background-color: #0785f4; }
+.vs-theme-night .folder-list { background-color: #080808; }
+.vs-theme-night .folder-list button, .vs-theme-night .folder-sidebar button { background-color: transparent; }
+
+#color-dialog.vs-theme-day, #folder-dialog.vs-theme-day { background-color: #f6f3ed; border-color: #a99d8d; color: #29251f; }
+.vs-theme-day .color-header, .vs-theme-day .color-footer, .vs-theme-day .folder-title, .vs-theme-day .folder-footer { background-color: #ded8cc; border-color: #b8aa97; }
+.vs-theme-day button { background-color: #d1c8bb; color: #29251f; }
+.vs-theme-day input { background-color: #ffffff; border-color: #a99d8d; color: #29251f; }
+.vs-theme-day button.primary, .vs-theme-day #choose { background-color: #965519; color: #ffffff; }
+.vs-theme-day .folder-list { background-color: #ffffff; }
+.vs-theme-day .folder-list button, .vs-theme-day .folder-sidebar button { background-color: transparent; }
+.vs-theme-day #message { color: #5b5044; }
+
+#color-dialog.vs-theme-contrast, #folder-dialog.vs-theme-contrast { background-color: #050505; border-color: #ffffff; color: #ffffff; }
+.vs-theme-contrast .color-header, .vs-theme-contrast .color-footer, .vs-theme-contrast .folder-title, .vs-theme-contrast .folder-footer { background-color: #141414; border-color: #d5d5d5; }
+.vs-theme-contrast button { background-color: #3a3a3a; color: #ffffff; }
+.vs-theme-contrast input { background-color: #050505; border-color: #ffffff; color: #ffffff; }
+.vs-theme-contrast button.primary, .vs-theme-contrast #choose { background-color: #f2bd46; color: #101010; }
+.vs-theme-contrast .folder-list { background-color: #050505; }
+.vs-theme-contrast .folder-list button, .vs-theme-contrast .folder-sidebar button { background-color: transparent; }
+
+#color-dialog button:hover, #folder-dialog button:hover { background-color: #535353; }
+#color-dialog button.primary:hover, #folder-dialog #choose:hover { background-color: #168cf2; }
+#color-dialog.vs-theme-day button:hover, #folder-dialog.vs-theme-day button:hover { background-color: #c0b29e; }
+#color-dialog.vs-theme-day button.primary:hover, #folder-dialog.vs-theme-day #choose:hover { background-color: #ad6925; }
+#color-dialog.vs-theme-contrast button.primary:hover, #folder-dialog.vs-theme-contrast #choose:hover { background-color: #ffdc86; }
+.vs-theme-night .folder-list button:hover, .vs-theme-night .folder-sidebar button:hover { background-color: #125eaa; }
+.vs-theme-day .folder-list button:hover, .vs-theme-day .folder-sidebar button:hover { background-color: #c89962; }
+.vs-theme-contrast .folder-list button:hover, .vs-theme-contrast .folder-sidebar button:hover { background-color: #f2bd46; color: #101010; }
+#color-dialog button:disabled, #folder-dialog button:disabled { background-color: #303030; color: #8b8b8b; }
+#color-dialog.vs-theme-day button:disabled, #folder-dialog.vs-theme-day button:disabled { background-color: #e0dace; color: #867b6e; }
+#color-dialog input.range { background-color: transparent; border-width: 0dp; }

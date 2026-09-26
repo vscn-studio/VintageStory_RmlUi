@@ -56,6 +56,11 @@ public sealed class RmlColorDialog : IDisposable
         customSlot = parent.Runtime.ColorPalette.NextSlot;
         Document = parent.Runtime.LoadDocumentFromString(parent.OwnerModId, Markup(), "vsrmlui:dialog/color-dialog.rml",
             new RmlDocumentOptions { Mode = RmlWindowMode.Modal, DrawOrder = Math.Max(.95, parent.Options.DrawOrder + .01), InputOrder = Math.Min(-.3, parent.Options.InputOrder - .1), CloseOnEscape = true });
+        foreach (string variant in new[] { "night", "day", "contrast" })
+        {
+            string name = "vs-theme-" + variant;
+            Get("color-dialog").SetClass(name, parent.Root.ClassNames.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(name) || parent.QuerySelector("." + name) is not null);
+        }
         Document.Closed += Dispose;
         parent.Closed += Dispose;
         Document.InputCancelled += EndDrag;
@@ -246,7 +251,7 @@ public sealed class RmlColorDialog : IDisposable
         string Checkers() => string.Concat(Enumerable.Range(0, 32).Select(i => $"<span class='checker' style='left:{N(i % 8 * 12.5)}%;top:{i / 8 * 25}%;background-color:{((i + i / 8) % 2 == 0 ? "#bbbbbb" : "#777777")}'/>"));
         string Preview(string name) => $"<div class='preview-item'><div class='caption'>{Label(name)}</div><div class='preview'>{Checkers()}<div id='{name}-color' class='preview-color'/></div></div>";
         string Field(string name, string label) => $"<div class='component'><label for='{name}'>{label}</label><input id='{name}' type='text' inputmode='decimal'/></div>";
-        var html = new StringBuilder("<rml><head><link type='text/rcss' href='vsrmlui:dialog/controls.rcss'/><link type='text/rcss' href='vsrmlui:dialog/color-dialog.rcss'/></head><body>");
+        var html = new StringBuilder("<rml><head><link type='text/rcss' href='vsrmlui:dialog/controls.rcss'/><link type='text/rcss' href='vsrmlui:dialog/color-dialog.rcss'/><link type='text/rcss' href='vsrmlui:dialog/dialog-theme.rcss'/></head><body>");
         html.Append($"<div id='color-dialog' role='dialog' aria-modal='true'><div class='color-header'>{Label("title")}</div><div class='color-content'><div class='palette-column'><div class='caption'>{Label("basic")}</div><div class='palette'>");
         for (int i = 0; i < BasicColors.Length; i++) html.Append(Swatch("basic-" + i, BasicColors[i]));
         html.Append($"</div><div class='caption custom-title'>{Label("custom")}</div><div class='palette'>");

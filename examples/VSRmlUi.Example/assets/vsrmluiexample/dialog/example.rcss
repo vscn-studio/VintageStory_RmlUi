@@ -1,11 +1,29 @@
 body { width: 100%; height: 100%; pointer-events: none; }
-#panel { position: absolute; left: 12%; top: 6%; width: 680dp; max-width: 85%; max-height: 90%; overflow: auto; pointer-events: auto; }
-#title { display: block; cursor: move; }
-#title span { font-size: 16dp; }
-.vs-row label { min-width: 95dp; }
-#items { height: 65dp; overflow: auto; background-color: #161c1780; padding: 8dp; }
-#items p { margin: 3dp; cursor: pointer; }
-#status { color: #dac78b; }
-body.stone #panel { background-color: #2d3038f5; border-color: #9499a6; }
-body.stone button { background-color: #515c72; border-color: #929fbd; }
-@media (max-width: 720px) { #panel { left: 3%; max-width: 94%; padding: 14dp; } }
+#panel { position: absolute; left: 5%; top: 5%; width: 960dp; max-width: 90%; height: 650dp; max-height: 90%; overflow: hidden; pointer-events: auto; }
+.vs-editor .text, .vs-editor textarea { width: 100%; }
+.vs-editor textarea { height: 260dp; }
+.vs-inspector select { width: 100%; }
+.vs-inspector .range { width: 100%; }
+.vs-toolbar { display: flex; align-items: center; margin-top: 14dp; }
+.vs-toolbar button { margin-right: 7dp; }
+#status { margin-top: 10dp; }
+.vs-view-heading { display: flex; align-items: center; margin-bottom: 12dp; }
+.vs-view-heading h2 { flex: 1; margin: 0dp; }
+#items-view { display: none; }
+#panel.items-view #editor-view { display: none; }
+#panel.items-view #items-view { display: block; }
+#items { height: 440dp; max-height: 75%; overflow-y: auto; }
+#items p { margin: 0dp; padding: 7dp 9dp; }
+#items .vs-list-item { border-bottom: 1dp #393939; }
+.vs-inspector .vs-row label { flex: 1; min-width: 0dp; margin-right: 0dp; }
+@media (max-width: 850px) {
+  #panel { left: 2%; top: 2%; max-width: 96%; max-height: 96%; }
+  .vs-workbench-body { flex-direction: column; overflow-y: auto; }
+  .vs-sidebar { display: flex; align-items: center; width: 100%; padding: 5dp 8dp; border-right-width: 0dp; border-bottom: 1dp #414141; }
+  .vs-sidebar .vs-section-title { display: none; }
+  .vs-nav-item { width: auto; margin: 0dp 5dp 0dp 0dp; }
+  .vs-editor { flex: none; min-height: 250dp; padding: 12dp; overflow-y: visible; }
+  .vs-editor textarea { height: 110dp; }
+  .vs-inspector { width: 100%; flex: none; padding: 12dp; border-left-width: 0dp; border-top: 1dp #414141; overflow-y: visible; }
+  #items { height: 200dp; max-height: none; }
+}

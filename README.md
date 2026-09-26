@@ -41,9 +41,34 @@ page.Show();
 
 完整示例见 [`examples/`](examples/)，API 定义见 [`src/VSRmlUi/`](src/VSRmlUi/)。
 
+## 默认主题与工作台布局
+
+在 RML 的 `<head>` 中引用 `vsrmlui:dialog/theme.rcss` 即可使用默认的黑灰与亮蓝工具主题。控件高度统一为 30dp；普通按钮采用直角，图标按钮只在悬停时显示背景。工作台窗口使用 `vs-window vs-workbench`，内部放置 `vs-titlebar` 和 `vs-workbench-body`，主体可用 `vs-sidebar`、`vs-editor`、`vs-inspector` 构成导航、编辑区和属性区。无需状态信息时可以省略 `vs-statusbar`。完整结构见 [`example.rml`](examples/VSRmlUi.Example/assets/vsrmluiexample/dialog/example.rml)。
+
+在窗口元素上添加 `vs-theme-night`、`vs-theme-day` 或 `vs-theme-contrast` 可切换夜间、日间和高对比配色；移除这些类即恢复默认主题。运行时可通过 `page.GetElementById("panel")!.SetClass("vs-theme-night", true)` 切换，内置颜色和文件夹弹窗会继承父页面当前的主题。日间主题采用灰白表面与暖棕强调色。
+
+紧凑工具窗口可使用 `vs-window vs-tabbed-window`，依次放入标题栏、`vs-tabs`、`vs-tab-content` 和 `vs-actions`。标签页仅顶部使用 4dp 圆角，宽度随文字而定；内容切换由模组绑定事件。完整示例见 [`tabbed-tool.rml`](examples/VSRmlUi.Example/assets/vsrmluiexample/dialog/tabbed-tool.rml)。
+
+主题还提供 `vs-primary`、`vs-ghost`、`vs-danger`、`vs-icon-button` 按钮样式，以及 `vs-toolbar`、`vs-segmented`、`vs-list`、`vs-list-item`、`vs-field` 和 `vs-row`。选中项添加 `active` 类。需要颜色、时间、滑块控件时再引用 `controls.rcss`。两种窗口及内置弹窗的各主题预览见 [`PREVIEWS.md`](PREVIEWS.md)。
+
 ## 基础控件
 
 `RmlControls.ColorPicker`、`TimePicker`、`Slider` 可生成嵌入表单的 RML。页面应在自身样式之后引用 `vsrmlui:dialog/controls.rcss`，并为 `.rml-picker` 设置适合表单的宽度。
+
+## Tabler SVG 图标
+
+RmlUi 的 SVG 插件已启用，内置 LunaSVG 3.5.0 作为渲染器。Tabler outline 图标以稳定路径提供，例如：
+
+```rml
+<svg class="vs-icon" src="vsrmlui:icons/tabler/search.svg" aria-label="搜索" />
+<svg class="vs-icon" src="vsrmlui:icons/tabler/settings.svg" aria-label="设置" />
+```
+
+图标文件位于 `src/VSRmlUi/assets/vsrmlui/icons/tabler/`，当前包含 `search`、`settings`、`x`、`folder`、`plus`、`check`、`chevron-down`、`download`、`player-play`、`device-floppy`、`arrow-left`、`trash`、`info-circle`、`palette`、`moon`、`sun`、`adjustments-horizontal`、`layout-sidebar` 和 `layout-sidebar-right`。建议用固定的 `.vs-icon` 尺寸，并把图标放在 `vs-icon-button` 中；按钮默认无边框，仅悬停时显示背景。
+
+C# 代码可使用 `RmlIcons.Search`、`RmlIcons.Settings`、`RmlIcons.Close` 等常量拼接 RML，避免散落路径字符串。
+
+SVG 插件需要 native 构建下载固定版本的 LunaSVG。发布包包含对应的许可证和 Tabler MIT 版权说明。
 
 加载文档后绑定选择器：
 

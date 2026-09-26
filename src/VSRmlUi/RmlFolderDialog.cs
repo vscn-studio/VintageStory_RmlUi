@@ -19,13 +19,18 @@ public sealed class RmlFolderDialog : IDisposable
     {
         parent.EnsureAlive(); this.parent = parent; this.api = api; this.accepted = accepted;
         Document = parent.Runtime.LoadDocumentFromString(parent.OwnerModId,
-            "<rml><head><link type='text/rcss' href='vsrmlui:dialog/folder-dialog.rcss'/></head><body>"
+            "<rml><head><link type='text/rcss' href='vsrmlui:dialog/folder-dialog.rcss'/><link type='text/rcss' href='vsrmlui:dialog/dialog-theme.rcss'/></head><body>"
             + "<div id='folder-dialog' role='dialog'><div class='folder-title'>[[vsrmlui:folder-title]]</div>"
             + "<div class='folder-address'><button id='up'>[[vsrmlui:folder-up]]</button><input id='address' type='text'/><button id='go'>[[vsrmlui:folder-go]]</button></div>"
             + "<div class='folder-main'><div class='folder-sidebar' id='locations'></div><div class='folder-list' id='folders'></div></div>"
             + "<div id='message'></div><div class='folder-footer'><button id='cancel'>[[vsrmlui:folder-cancel]]</button><button id='choose'>[[vsrmlui:folder-select]]</button></div>"
             + "</div></body></rml>", "vsrmlui:dialog/folder-dialog.rml",
             new() { Mode = RmlWindowMode.Modal, DrawOrder = Math.Max(.95, parent.Options.DrawOrder + .01), InputOrder = Math.Min(-.3, parent.Options.InputOrder - .1) });
+        foreach (string variant in new[] { "night", "day", "contrast" })
+        {
+            string name = "vs-theme-" + variant;
+            Get("folder-dialog").SetClass(name, parent.Root.ClassNames.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(name) || parent.QuerySelector("." + name) is not null);
+        }
         Document.Closed += Dispose; parent.Closed += Dispose;
         Get("cancel").On("click", _ => Dispose());
         Get("go").On("click", _ => Navigate(Get("address").Value));

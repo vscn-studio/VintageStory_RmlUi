@@ -1,0 +1,14 @@
+<rml>
+<head>
+  <title>RmlUi modal</title>
+  <link type="text/rcss" href="vsrmlui:dialog/theme.rcss" />
+  <link type="text/rcss" href="modal.rcss" />
+</head>
+<body>
+  <div id="box" class="vs-window">
+    <div class="modal-title">[[vsrmluiexample:modal-title]]</div>
+    <div class="modal-content">[[vsrmluiexample:modal-description]]</div>
+    <div class="modal-actions"><button id="ok" class="vs-primary">[[vsrmluiexample:ok]]</button></div>
+  </div>
+</body>
+</rml>
