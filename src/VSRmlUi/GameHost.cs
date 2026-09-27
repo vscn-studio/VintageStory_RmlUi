@@ -31,7 +31,10 @@ internal sealed partial class GameHost(ICoreClientAPI api) : IRmlHost
         return (pixels, info.Width, info.Height);
     }
     // Explicit tokens leave normal RML text and data-binding expressions untouched.
-    public string Translate(string input) => TranslationToken().Replace(input, match => Lang.Get(match.Groups[1].Value));
+    // RML translation tokens are complete keys, not format calls. Reading the
+    // unformatted value preserves placeholders for callers that supply values
+    // later and avoids TranslationService formatting with an empty argument list.
+    public string Translate(string input) => TranslationToken().Replace(input, match => Lang.GetUnformatted(match.Groups[1].Value));
     [GeneratedRegex(@"\[\[([a-zA-Z0-9_-]+:[^\[\]\r\n]+)\]\]")]
     private static partial Regex TranslationToken();
     public string Clipboard { get => api.Input.ClipboardText ?? ""; set => api.Input.ClipboardText = value; }
