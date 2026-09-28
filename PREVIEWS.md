@@ -27,5 +27,6 @@ The test writes PNG files under `artifacts/previews/`. This directory is generat
 | Node editor | `node-editor-default.png`, `node-editor-moved.png` |
 | Volume knob | `knob-low.png`, `knob-high.png` |
 | Switch | `switch-off.png`, `switch-on.png` |
+| MIDI / OSC monitor | `midi-osc-midi.png`, `midi-osc-osc.png` |
 
 `<variant>` is `default`, `night`, `day`, or `contrast`. The folder previews use a static folder list fixture with the same RML structure and styles as the runtime dialog; no filesystem contents are included.

@@ -75,4 +75,22 @@ static class PresetChecks
         preview(page, "switch-on");
         check(changed && page.GetElementById("enabled")!.GetAttribute("aria-checked") == "true" && page.QuerySelector(".vs-switch-thumb")!.Bounds.X > left, "switch click updates state, callback and thumb position");
     }
+
+    internal static void MidiOsc(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        var midi = MidiMessage.NoteOn(2, 64, 100);
+        check(midi.Channel == 2 && midi.Command == 0x90, "MIDI message preserves channel and command");
+        var decoded = OscCodec.Decode(OscCodec.Encode(new("/synth/cutoff", [440, 0.75f, "Hz"])));
+        check(decoded.Address == "/synth/cutoff" && (int)decoded.Arguments[0] == 440 && (float)decoded.Arguments[1] == 0.75f, "OSC codec round trips typed arguments");
+        using var receiver = new OscUdpPort();
+        using var sender = new OscUdpPort();
+        sender.SendAsync(new("/synth/cutoff", [440]), new(System.Net.IPAddress.Loopback, receiver.LocalPort)).GetAwaiter().GetResult();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        check(receiver.ReceiveAsync(timeout.Token).GetAwaiter().GetResult().Address == "/synth/cutoff", "OSC UDP loopback receives a message");
+        using var page = Page(ui, "midi-osc", "MIDI / OSC", RmlMidiOscMonitor.Markup("monitor"));
+        RmlMidiOscMonitor.Show(page, "monitor", "MIDI ch 3", "Note on  E4  velocity 100");
+        preview(page, "midi-osc-midi");
+        RmlMidiOscMonitor.Show(page, "monitor", "OSC", "/synth/cutoff  440 Hz");
+        preview(page, "midi-osc-osc");
+    }
 }
