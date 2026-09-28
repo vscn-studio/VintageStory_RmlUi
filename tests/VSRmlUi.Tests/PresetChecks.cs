@@ -51,4 +51,15 @@ static class PresetChecks
         check(before != page.GetElementById("graph-wires")!.InnerRml && graph.Links.Count == 2, "node editor recalculates colored links after a node moves");
         graph.Unbind();
     }
+
+    internal static void Knob(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        using var page = Page(ui, "knob", "Volume knob", RmlKnob.Markup("volume"));
+        RmlKnob.SetValue(page, "volume", 0.25);
+        preview(page, "knob-low");
+        string before = page.GetElementById("volume-ring")!.InnerRml;
+        RmlKnob.SetValue(page, "volume", 0.82);
+        preview(page, "knob-high");
+        check(before != page.GetElementById("volume-ring")!.InnerRml && page.GetElementById("volume")!.GetAttribute("aria-valuenow") == "82", "knob arc and value respond to volume");
+    }
 }
