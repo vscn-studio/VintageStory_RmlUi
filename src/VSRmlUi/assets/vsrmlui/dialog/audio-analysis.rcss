@@ -1,0 +1,3 @@
+.vs-audio-chart { display: block; width: 720dp; height: 280dp; background-color: #080b0a; border: 1dp #3c5143; }
+.vs-theme-day .vs-audio-chart { background-color: #151918; border-color: #57725e; }
+.vs-theme-contrast .vs-audio-chart { background-color: #000000; border-color: #ffffff; }

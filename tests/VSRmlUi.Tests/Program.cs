@@ -209,6 +209,50 @@ if (!args.Contains("--headless"))
             Preview(pitchCurve, "pitch-curve-high");
             Check(pitchCurve.GetElementById("pitch")!.InnerRml != low && pitchCurve.GetElementById("pitch")!.GetAttribute("aria-label") == "880 Hz", "pitch curve changes frequency and accessible label");
         }
+        using (var analysis = ui.LoadDocumentFromString("vsrmlui", "<rml><head><link type='text/rcss' href='vsrmlui:dialog/theme.rcss'/><link type='text/rcss' href='vsrmlui:dialog/audio-analysis.rcss'/><style>body { padding: 36dp; background-color: #202020; }</style></head><body><h2>Audio analysis</h2>"
+            + RmlAudioVisualizers.Waveform("wave") + RmlAudioVisualizers.FrequencyResponse("frequency") + RmlAudioVisualizers.Spectrogram("spectrum") + "</body></rml>", "vsrmlui:dialog/audio-analysis-preview.rml"))
+        {
+            analysis.Show();
+            var samples = new float[4096];
+            for (int i = 0; i < samples.Length; i++)
+            {
+                double time = i / (double)samples.Length;
+                double envelope = Math.Pow(Math.Sin(Math.PI * time), 0.7) * (0.55 + 0.35 * Math.Sin(6 * Math.PI * time) * Math.Sin(6 * Math.PI * time));
+                samples[i] = (float)(envelope * Math.Sin(i * (0.22 + 0.06 * time)));
+            }
+            RmlAudioVisualizers.SetWaveform(analysis, "wave", samples, 1.4);
+            var response = new float[256];
+            for (int i = 0; i < response.Length; i++)
+            {
+                double x = i / 255.0;
+                double peak = 42 * Math.Exp(-Math.Pow((x - 0.07) / 0.035, 2));
+                response[i] = (float)(-75 + peak + 13 * Math.Sin(27 * x) * Math.Exp(-2 * x) + 9 * Math.Sin(73 * x) * Math.Exp(-3 * x));
+            }
+            RmlAudioVisualizers.SetFrequencyResponse(analysis, "frequency", response, 8000);
+            var spectrum = new float[96 * 48];
+            for (int x = 0; x < 96; x++)
+                for (int y = 0; y < 48; y++)
+                {
+                    double fundamental = 4 + 2 * Math.Sin(x * 0.1) + (x > 48 ? 1 : 0);
+                    double energy = 0;
+                    for (int harmonic = 1; harmonic <= 8; harmonic++)
+                        energy += Math.Exp(-Math.Pow((y - fundamental * harmonic) / (0.7 + harmonic * 0.15), 2)) * (0.9 / Math.Sqrt(harmonic));
+                    spectrum[x * 48 + y] = (float)Math.Clamp(energy, 0, 1);
+                }
+            RmlAudioVisualizers.SetSpectrogram(analysis, "spectrum", spectrum, 96, 48, 8000);
+            analysis.GetElementById("frequency")!.SetProperty("display", "none");
+            analysis.GetElementById("spectrum")!.SetProperty("display", "none");
+            Preview(analysis, "audio-analysis-waveform");
+            Check(analysis.GetElementById("wave")!.InnerRml.Contains("#45db9e") && analysis.GetElementById("wave")!.Bounds.Height > 0, "PCM waveform renders sampled peaks");
+            analysis.GetElementById("wave")!.SetProperty("display", "none");
+            analysis.GetElementById("frequency")!.SetProperty("display", "block");
+            Preview(analysis, "audio-analysis-frequency");
+            Check(analysis.GetElementById("frequency")!.InnerRml.Contains("#45db9e"), "frequency response renders dB bins");
+            analysis.GetElementById("frequency")!.SetProperty("display", "none");
+            analysis.GetElementById("spectrum")!.SetProperty("display", "block");
+            Preview(analysis, "audio-analysis-spectrogram");
+            Check(analysis.GetElementById("spectrum")!.InnerRml.Contains("<rect") && analysis.GetElementById("spectrum")!.GetAttribute("aria-label").Contains("96 time bins"), "spectrogram renders time-frequency magnitudes");
+        }
         foreach (string name in new[] { "night", "day", "contrast" })
             document.GetElementById("panel")!.SetClass("vs-theme-" + name, false);
         document.GetElementById("theme")!.Value = "default";
