@@ -93,4 +93,15 @@ static class PresetChecks
         RmlMidiOscMonitor.Show(page, "monitor", "OSC", "/synth/cutoff  440 Hz");
         preview(page, "midi-osc-osc");
     }
+
+    internal static void VrPlane(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        var plane = new RmlVrPlane();
+        check(plane.TryHit(new(new(0, 0, 1), -System.Numerics.Vector3.UnitZ), out var center) && center.PixelX == 600 && center.PixelY == 350, "VR center ray maps to UI center pixel");
+        check(!plane.TryHit(new(new(2, 0, 1), -System.Numerics.Vector3.UnitZ), out _), "VR ray outside plane is rejected");
+        plane.Rotation = System.Numerics.Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.UnitY, MathF.PI / 2);
+        check(plane.TryHit(new(new(1, 0, 0), -System.Numerics.Vector3.UnitX), out var rotated) && rotated.PixelX == 600, "VR rotated plane maps controller ray");
+        using var page = Page(ui, "vr-plane", "VR UI plane", RmlVrPlane.PreviewMarkup());
+        preview(page, "vr-plane");
+    }
 }
