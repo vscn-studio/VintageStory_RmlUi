@@ -31,8 +31,8 @@ class PackagingTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_bytes(b"test fixture only")
         (self.root / "build").mkdir()
-        self.write_json("src/VSRmlUi/modinfo.json", {"version": "1.0.5"})
-        self.write_json("artifacts/managed/manifest.json", {"version": "1.0.5", "bridgeSource": build.bridge_hash(), "sha256": hashlib.sha256(b"test fixture only").hexdigest()})
+        self.write_json("src/VSRmlUi/modinfo.json", {"version": build.VERSION})
+        self.write_json("artifacts/managed/manifest.json", {"version": build.VERSION, "bridgeSource": build.bridge_hash(), "sha256": hashlib.sha256(b"test fixture only").hexdigest()})
         for rid in build.REQUIRED:
             self.add_native(rid)
 
@@ -54,7 +54,7 @@ class PackagingTests(unittest.TestCase):
         staged = self.root / "artifacts/example"
         staged.mkdir(parents=True)
         (staged / "VSRmlUi.Example.dll").write_bytes(b"synthetic test mod")
-        self.write_json(staged / "modinfo.json", {"modid": "vsrmluiexample", "version": "1.0.5"})
+        self.write_json(staged / "modinfo.json", {"modid": "vsrmluiexample", "version": build.VERSION})
         (staged / "assets/vsrmluiexample/dialog/input-test.rml").parent.mkdir(parents=True)
         (staged / "assets/vsrmluiexample/dialog/input-test.rml").write_text("<rml />", encoding="utf-8")
 
@@ -63,10 +63,10 @@ class PackagingTests(unittest.TestCase):
         self.add_native("osx-arm64")
         self.package()
         archives = list((self.root / "artifacts").glob("*.zip"))
-        self.assertEqual([p.name for p in archives], ["vsrmlui_1.0.5.zip"])
+        self.assertEqual([p.name for p in archives], [f"vsrmlui_{build.VERSION}.zip"])
         with zipfile.ZipFile(archives[0]) as z:
             self.assertIsNone(z.testzip())
-            self.assertEqual(json.loads(z.read("modinfo.json"))["version"], "1.0.5")
+            self.assertEqual(json.loads(z.read("modinfo.json"))["version"], build.VERSION)
             self.assertEqual(set(z.namelist()), {"VSRmlUi.dll", "modinfo.json", "modicon.png", "LICENSE", "COPYRIGHT.txt", "licenses/MIT", "assets/test.txt", "native/win-x64/vsrmlui_native.dll", "native/linux-x64/libvsrmlui_native.so", "native/osx-x64/libvsrmlui_native.dylib", "native/osx-arm64/libvsrmlui_native.dylib"})
 
     def test_missing_linux_refuses_partial_archive(self):
@@ -88,6 +88,20 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "manifest mismatch"):
             self.package()
 
+    def test_unrelated_native_commit_is_rejected(self):
+        manifest_path = self.root / "artifacts/native/win-x64/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["sourceCommit"] = "0" * 40
+        self.write_json(manifest_path, manifest)
+        with patch.object(build, "source_commit", return_value="f" * 40), patch.object(build, "native_commit_is_ancestor", return_value=False):
+            with self.assertRaisesRegex(RuntimeError, "manifest mismatch"):
+                self.package()
+
+    def test_ancestor_native_commit_can_be_reused(self):
+        with patch.object(build, "source_commit", return_value="f" * 40), patch.object(build, "native_commit_is_ancestor", return_value=True):
+            self.package()
+        self.assertTrue((self.root / f"artifacts/vsrmlui_{build.VERSION}.zip").is_file())
+
     def test_same_version_managed_with_old_bridge_is_rejected(self):
         manifest_path = self.root / "artifacts/managed/manifest.json"
         manifest = json.loads(manifest_path.read_text())
@@ -98,7 +112,7 @@ class PackagingTests(unittest.TestCase):
 
     def test_fonts_are_rejected_before_replacing_release(self):
         self.package()
-        release = self.root / "artifacts/vsrmlui_1.0.5.zip"
+        release = self.root / f"artifacts/vsrmlui_{build.VERSION}.zip"
         original = release.read_bytes()
         for extension in build.FONT_EXTENSIONS:
             font = self.root / "src/VSRmlUi/assets" / ("leftover" + extension.upper())
@@ -116,12 +130,12 @@ class PackagingTests(unittest.TestCase):
 
     def test_wrong_managed_version_is_rejected(self):
         self.write_json("artifacts/managed/manifest.json", {"version": "0.1.1"})
-        with self.assertRaisesRegex(RuntimeError, "does not match 1.0.5"):
+        with self.assertRaisesRegex(RuntimeError, f"does not match {build.VERSION}"):
             self.package()
 
     def test_failed_update_preserves_existing_release(self):
         self.package()
-        release = self.root / "artifacts/vsrmlui_1.0.5.zip"
+        release = self.root / f"artifacts/vsrmlui_{build.VERSION}.zip"
         original = release.read_bytes()
         (self.root / "artifacts/native/linux-x64/libvsrmlui_native.so").unlink()
         with self.assertRaises(RuntimeError):
@@ -130,15 +144,15 @@ class PackagingTests(unittest.TestCase):
 
     def test_windows_linux_release_without_mac(self):
         self.package()
-        with zipfile.ZipFile(self.root / "artifacts/vsrmlui_1.0.5.zip") as z:
+        with zipfile.ZipFile(self.root / f"artifacts/vsrmlui_{build.VERSION}.zip") as z:
             self.assertIn("native/win-x64/vsrmlui_native.dll", z.namelist())
             self.assertIn("native/linux-x64/libvsrmlui_native.so", z.namelist())
 
     def test_input_diagnostics_archive_is_separate(self):
         self.add_example()
         self.package()
-        self.assertEqual(sorted(p.name for p in (self.root / "artifacts").glob("*.zip")), ["vsrmlui-test_1.0.5.zip", "vsrmlui_1.0.5.zip"])
-        with zipfile.ZipFile(self.root / "artifacts/vsrmlui-test_1.0.5.zip") as z:
+        self.assertEqual(sorted(p.name for p in (self.root / "artifacts").glob("*.zip")), [f"vsrmlui-test_{build.VERSION}.zip", f"vsrmlui_{build.VERSION}.zip"])
+        with zipfile.ZipFile(self.root / f"artifacts/vsrmlui-test_{build.VERSION}.zip") as z:
             self.assertEqual(set(z.namelist()), {"VSRmlUi.Example.dll", "modinfo.json", "LICENSE", "COPYRIGHT.txt", "licenses/MIT", "assets/vsrmluiexample/dialog/input-test.rml"})
 
 

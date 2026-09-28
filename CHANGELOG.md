@@ -1,5 +1,11 @@
 # 更新日志
 
+## 1.0.6 (2026-09-28)
+
+- 增加音频分析、加载动画、节点编辑器、旋钮、开关、MIDI/OSC 接口、VR UI 平面、日期选择器和 3D 方向指示器预设及预览。
+- 更新滑块、复选框和下拉菜单样式；增加 Tabler 图标与点击反馈。
+- 合并经过 ABI smoke 检查的 Windows x64、Linux x64、macOS x64 和 macOS arm64 native 产物。原生 ABI 仍为 2。
+
 ## 1.0.5 (2026-09-27)
 
 - 修复游戏未索引 `vsrmlui:icons/` 资源类别，导致内嵌 Tabler SVG 图标报 `Asset not found` 的问题。

@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
 REVISION = "3045e6e3510425ef2870f7647b3f59d3ae9970f5"
 FILES = {"win": "vsrmlui_native.dll", "linux": "libvsrmlui_native.so", "osx": "libvsrmlui_native.dylib"}
 SUPPORTED = ("win-x64", "linux-x64", "osx-x64", "osx-arm64")
-VERSION = "1.0.5"
+VERSION = "1.0.6"
 REQUIRED = ("win-x64", "linux-x64")
 FONT_EXTENSIONS = {".ttf", ".otf", ".ttc", ".otc", ".woff", ".woff2", ".fnt", ".bdf", ".pcf"}
 
@@ -44,6 +44,18 @@ def source_commit():
         ).strip()
     except (OSError, subprocess.CalledProcessError):
         return ""
+
+
+def native_commit_is_ancestor(source):
+    """Managed-only commits may reuse a native build from an earlier source commit."""
+    if not source:
+        return False
+    return subprocess.run(
+        ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", source, "HEAD"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    ).returncode == 0
 
 
 def host_rid():
@@ -116,7 +128,7 @@ def package_merged(native_root):
             expected_commit = source_commit()
             if (manifest.get("rid") != rid or manifest.get("rmlui") != REVISION
                     or manifest.get("bridgeSource") != bridge_hash()
-                    or (expected_commit and manifest.get("sourceCommit") != expected_commit)
+                    or (expected_commit and not native_commit_is_ancestor(manifest.get("sourceCommit")))
                     or manifest.get("sha256") != hashlib.sha256(binary.read_bytes()).hexdigest()):
                 raise RuntimeError(f"Native artifact manifest mismatch: {folder}")
             if not manifest.get("nativeSmoke"):
