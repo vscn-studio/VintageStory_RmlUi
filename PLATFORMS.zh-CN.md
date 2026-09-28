@@ -49,6 +49,6 @@ Linux 渲染器使用 `libGL.so.1` / `glXGetProcAddressARB`；原生 Wayland/EGL
 
 1.0.2 基于 commit `ddaa4b51b6b80f6b9d7c236e56c99c1d03274f0e`。该版本移除包内 Noto 字体，增加系统字体缺字回退和 TTC face index，并将 native ABI 升为 2；四个平台 native bundle 必须从本次源码重新构建，不能继续复用旧文件。运行时优先使用游戏字体资产，缺字时读取本机字体；Linux 没有对应 CJK 字体时会记录一次警告。
 
-版本已更新为 1.0.6，构建目标为 Windows/Linux x64、macOS x64 和 macOS arm64。1.0.4 引入 SVG 插件和 LunaSVG，1.0.5 修复客户端图标资源索引。1.0.6 增加预设组件和音频分析视图，native 源码和 ABI 2 未变化；本次合包使用基于提交 `63a1dbe` 构建并经过 smoke 检查的四个平台原生库。构建示例后会额外产生 `vsrmlui-test_1.0.6.zip`，其中的 F9 输入诊断窗口用于真实游戏内检查 IME、键盘修饰键、文本控件和鼠标操作；它依赖主模组包。
+版本已更新为 1.0.6，构建目标为 Windows/Linux x64、macOS x64 和 macOS arm64。1.0.4 引入 SVG 插件和 LunaSVG，1.0.5 修复客户端图标资源索引。1.0.6 增加预设组件和音频分析视图，native 源码和 ABI 2 未变化；本次合包使用基于提交 `06e60bc` 构建并经过 smoke 检查的四个平台原生库。构建示例后会额外产生 `vsrmlui-test_1.0.6.zip`，其中的 F9 输入诊断窗口用于真实游戏内检查 IME、键盘修饰键、文本控件和鼠标操作；它依赖主模组包。
 
 CI 默认执行四平台原生构建，这些是合包输入而不是可安装的模组分包。完整合包任务需要一台配置好 Python、.NET 10、MSVC/CMake、游戏目录的 Windows self-hosted runner，标签为 `vsrmlui-packaging`，环境变量 `VS_GAME_DIRECTORY` 指向游戏安装目录。手动运行工作流并启用 `package_release`，它会等待四平台 native 任务通过，下载全部产物、构建托管 DLL 和示例，并输出 `vsrmlui_1.0.6.zip` 与 `vsrmlui-test_1.0.6.zip`。未配置该 runner 时，先运行 native 任务，再把产物下载到本机 `artifacts/native`，用 `-PackageOnly` 合包。
