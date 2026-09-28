@@ -1,0 +1,11 @@
+.vs-date-picker { width: 272dp; padding: 10dp; background-color: #222927; border: 1dp #5a6d64; }
+.vs-date-head { display: flex; align-items: center; justify-content: space-between; height: 34dp; }
+.vs-date-head button { width: 28dp; min-width: 28dp; padding: 0dp; }
+.vs-date-grid { display: flex; flex-wrap: wrap; margin-top: 9dp; }
+.vs-date-weekday, .vs-date-empty, button.vs-date-day { width: 36dp; height: 32dp; box-sizing: border-box; text-align: center; }
+.vs-date-weekday { color: #a8c0b2; font-size: 11dp; line-height: 32dp; }
+button.vs-date-day { min-width: 36dp; padding: 0dp; background-color: transparent; }
+button.vs-date-day:hover { background-color: #3b5750; }
+button.vs-date-day.selected { background-color: #168c75; color: #ffffff; }
+.vs-theme-day .vs-date-picker { background-color: #f7faf7; border-color: #9cab9f; }
+.vs-theme-day .vs-date-weekday { color: #4c6253; }

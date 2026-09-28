@@ -104,4 +104,17 @@ static class PresetChecks
         using var page = Page(ui, "vr-plane", "VR UI plane", RmlVrPlane.PreviewMarkup());
         preview(page, "vr-plane");
     }
+
+    internal static void DatePicker(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        var picker = new RmlDatePicker("calendar", new DateOnly(2026, 9, 28));
+        using var page = Page(ui, "date-picker", "Date picker", picker.Markup());
+        picker.Bind(page);
+        preview(page, "date-picker-september");
+        picker.MoveMonth(1);
+        preview(page, "date-picker-october");
+        picker.Select(new DateOnly(2026, 10, 15));
+        check(picker.Selected == new DateOnly(2026, 10, 15) && page.GetElementById("calendar-grid")!.InnerRml.Contains("2026-10-15"), "date picker changes month and selected day");
+        picker.Unbind();
+    }
 }

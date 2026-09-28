@@ -196,6 +196,7 @@ if (!args.Contains("--headless"))
         PresetChecks.Switch(ui, (page, name) => Preview(page, name), Check);
         PresetChecks.MidiOsc(ui, (page, name) => Preview(page, name), Check);
         PresetChecks.VrPlane(ui, (page, name) => Preview(page, name), Check);
+        PresetChecks.DatePicker(ui, (page, name) => Preview(page, name), Check);
         using (var audioBars = ui.LoadDocumentFromString("vsrmlui", "<rml><head><link type='text/rcss' href='vsrmlui:dialog/theme.rcss'/><link type='text/rcss' href='vsrmlui:dialog/audio-bars.rcss'/><style>body { padding: 60dp; background-color: #202020; } .vs-audio-bars { width: 240dp; }</style></head><body><h2>Audio level</h2>" + RmlControls.AudioBars("meter") + "</body></rml>", "vsrmlui:dialog/audio-bars-preview.rml"))
         {
             audioBars.Show();
