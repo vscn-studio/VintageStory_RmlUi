@@ -21,6 +21,28 @@ public static class RmlControls
         return slider.On("change", e => display.Text = string.IsNullOrEmpty(e.Value) ? slider.Value : e.Value);
     }
 
+    public static string AudioBars(string id, int count = 24)
+    {
+        if (count is < 3 or > 64) throw new ArgumentOutOfRangeException(nameof(count));
+        return $"<div id='{E(id)}' class='vs-audio-bars' role='meter' aria-valuemin='0' aria-valuemax='1' aria-valuenow='0'>"
+            + string.Concat(Enumerable.Range(0, count).Select(i => $"<span id='{E(id)}-bar-{i}' class='vs-audio-bar' style='height:3dp'/>") ) + "</div>";
+    }
+
+    public static void SetAudioBars(RmlDocument document, string id, double volume, double phase = 0)
+    {
+        if (!double.IsFinite(volume) || !double.IsFinite(phase)) throw new ArgumentOutOfRangeException(nameof(volume));
+        var root = document.GetElementById(id) ?? throw new ArgumentException($"Audio bars '{id}' were not found.", nameof(id));
+        root.SetAttribute("aria-valuenow", N(Math.Clamp(volume, 0, 1)));
+        double level = Math.Clamp(volume, 0, 1);
+        for (int i = 0; ; i++)
+        {
+            var bar = document.GetElementById(id + "-bar-" + i);
+            if (bar is null) break;
+            double wave = 0.35 + 0.65 * Math.Abs(Math.Sin(i * 1.67 + phase) * Math.Cos(i * 0.39 - phase * 0.7));
+            bar.SetProperty("height", N(3 + 45 * level * wave) + "dp");
+        }
+    }
+
     public static string ColorPicker(string id, string value)
     {
         if (!TryParseColor(value, out uint rgba)) rgba = 0xffffffff;

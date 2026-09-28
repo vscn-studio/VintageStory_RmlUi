@@ -1,0 +1,7 @@
+.vs-audio-bars { display: flex; align-items: center; width: 100%; height: 52dp; padding: 0dp 3dp; box-sizing: border-box; background-color: #151515; border: 1dp #555555; }
+.vs-audio-bar { flex: 1; min-width: 2dp; max-width: 7dp; margin-right: 2dp; background-color: #2a9bff; }
+.vs-audio-bar:last-child { margin-right: 0dp; }
+.vs-theme-day .vs-audio-bars { background-color: #e6e0d6; border-color: #aa9f90; }
+.vs-theme-day .vs-audio-bar { background-color: #aa671e; }
+.vs-theme-contrast .vs-audio-bars { background-color: #111111; border-color: #ffffff; }
+.vs-theme-contrast .vs-audio-bar { background-color: #f2bd46; }

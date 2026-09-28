@@ -189,6 +189,16 @@ if (!args.Contains("--headless"))
             Preview(document, "workbench-" + variant + "-narrow", 600);
         }
         Console.WriteLine("Previews: " + Path.Combine(root, "artifacts", "previews"));
+        using (var audioBars = ui.LoadDocumentFromString("vsrmlui", "<rml><head><link type='text/rcss' href='vsrmlui:dialog/theme.rcss'/><link type='text/rcss' href='vsrmlui:dialog/audio-bars.rcss'/><style>body { padding: 60dp; background-color: #202020; } .vs-audio-bars { width: 240dp; }</style></head><body><h2>Audio level</h2>" + RmlControls.AudioBars("meter") + "</body></rml>", "vsrmlui:dialog/audio-bars-preview.rml"))
+        {
+            audioBars.Show();
+            RmlControls.SetAudioBars(audioBars, "meter", 0.18, 0);
+            Preview(audioBars, "audio-bars-low");
+            var low = audioBars.GetElementById("meter-bar-2")!.Bounds.Height;
+            RmlControls.SetAudioBars(audioBars, "meter", 0.9, 1.4);
+            Preview(audioBars, "audio-bars-high");
+            Check(audioBars.GetElementById("meter-bar-2")!.Bounds.Height > low && audioBars.GetElementById("meter")!.GetAttribute("aria-valuenow") == "0.9", "audio bars respond to level and expose meter value");
+        }
         foreach (string name in new[] { "night", "day", "contrast" })
             document.GetElementById("panel")!.SetClass("vs-theme-" + name, false);
         document.GetElementById("theme")!.Value = "default";
