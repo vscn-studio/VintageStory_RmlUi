@@ -1,0 +1,13 @@
+.vs-node-editor { position: relative; width: 960dp; height: 560dp; background-color: #151a19; border: 1dp #495653; overflow: hidden; }
+.vs-node-wires { position: absolute; width: 960dp; height: 560dp; pointer-events: none; }
+.vs-node { position: absolute; width: 230dp; background-color: #29312f; border: 1dp #62706c; border-radius: 6dp; cursor: move; }
+.vs-node-title { padding: 10dp 12dp; background-color: #38433f; border-bottom: 1dp #62706c; font-weight: bold; }
+.vs-node-ports { padding: 8dp 0dp; }
+.vs-node-port-row { display: flex; align-items: center; height: 31dp; justify-content: space-between; }
+.vs-node-port { display: flex; align-items: center; min-width: 0dp; padding: 0dp 9dp; font-size: 12dp; }
+.vs-node-port.output { flex-direction: row-reverse; }
+.vs-node-port .vs-node-dot { display: block; width: 10dp; height: 10dp; margin-right: 6dp; border-radius: 5dp; }
+.vs-node-port.output .vs-node-dot { margin-right: 0dp; margin-left: 6dp; }
+.vs-theme-day .vs-node-editor { background-color: #e5e9e6; border-color: #8b9a92; }
+.vs-theme-day .vs-node { background-color: #ffffff; border-color: #9caaa1; }
+.vs-theme-day .vs-node-title { background-color: #d4dfd8; border-color: #9caaa1; }

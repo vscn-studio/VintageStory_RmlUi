@@ -33,4 +33,22 @@ static class PresetChecks
         preview(page, "feedback-checked");
         check(page.QuerySelector("input:checked") is not null && checkbox.Bounds.Width == 24, "checkbox feedback keeps selected state and stable layout");
     }
+
+    internal static void NodeEditor(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        var graph = new RmlNodeEditor("graph");
+        graph.AddNode(new("source", "Audio input", 70, 95, [], [new("signal", "Signal", "#41d9ac")]));
+        graph.AddNode(new("filter", "Low-pass filter", 370, 165, [new("input", "Audio", "#41d9ac")], [new("output", "Filtered", "#ffae57")]));
+        graph.AddNode(new("output", "Output", 690, 120, [new("input", "Signal", "#ffae57")], []));
+        graph.Connect(new("source", "signal", "filter", "input"));
+        graph.Connect(new("filter", "output", "output", "input"));
+        using var page = Page(ui, "node-editor", "Node editor", graph.Markup());
+        graph.Bind(page);
+        preview(page, "node-editor-default");
+        string before = page.GetElementById("graph-wires")!.InnerRml;
+        graph.MoveNode("filter", 400, 270);
+        preview(page, "node-editor-moved");
+        check(before != page.GetElementById("graph-wires")!.InnerRml && graph.Links.Count == 2, "node editor recalculates colored links after a node moves");
+        graph.Unbind();
+    }
 }
