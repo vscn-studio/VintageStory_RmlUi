@@ -1,6 +1,6 @@
 .vs-node-editor { position: relative; width: 960dp; height: 560dp; background-color: #151a19; border: 1dp #495653; overflow: hidden; }
 .vs-node-wires { position: absolute; width: 960dp; height: 560dp; pointer-events: none; }
-.vs-node { position: absolute; width: 230dp; background-color: #29312f; border: 1dp #62706c; border-radius: 6dp; cursor: move; }
+.vs-node { position: absolute; width: 230dp; background-color: #29312f; border: 1dp #62706c; border-radius: 6dp; cursor: move; drag: drag; }
 .vs-node-title { padding: 10dp 12dp; background-color: #38433f; border-bottom: 1dp #62706c; font-weight: bold; }
 .vs-node-ports { padding: 8dp 0dp; }
 .vs-node-port-row { display: flex; align-items: center; height: 31dp; justify-content: space-between; }

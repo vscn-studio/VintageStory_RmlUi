@@ -1,4 +1,4 @@
-.vs-knob { position: relative; display: inline-block; width: 80dp; height: 80dp; cursor: pointer; }
+.vs-knob { position: relative; display: inline-block; width: 80dp; height: 80dp; cursor: pointer; drag: drag; }
 .vs-knob svg { display: block; width: 80dp; height: 80dp; }
 .vs-knob-value { position: absolute; top: 25dp; left: 0dp; width: 80dp; height: 30dp; line-height: 30dp; text-align: center; font-weight: bold; pointer-events: none; }
 .vs-theme-day .vs-knob-value { color: #202820; }

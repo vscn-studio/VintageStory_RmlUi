@@ -1,2 +1,2 @@
-.vs-orientation { width: 180dp; height: 180dp; cursor: move; }
+.vs-orientation { width: 180dp; height: 180dp; cursor: move; drag: drag; }
 .vs-orientation svg { width: 180dp; height: 180dp; display: block; }

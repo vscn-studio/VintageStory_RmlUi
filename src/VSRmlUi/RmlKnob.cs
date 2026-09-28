@@ -33,7 +33,7 @@ public static class RmlKnob
             element.On("mousedown", e => { startY = e.MouseY; startValue = Current(); }),
             element.On("drag", e => Publish(startValue + (startY - e.MouseY) / 120.0)),
             element.On("mousewheel", e => Publish(Current() + (e.Wheel > 0 ? 0.02 : -0.02))),
-            element.On("keydown", e => { if (e.Key is 79 or 81) Publish(Current() + (e.Key == 79 ? 0.01 : -0.01)); })
+            element.On("keydown", e => { if (e.Key is 90 or 92) Publish(Current() + (e.Key == 92 ? 0.01 : -0.01)); })
         };
         return new Bindings(handlers);
         double Current() => double.Parse(element.GetAttribute("aria-valuenow"), CultureInfo.InvariantCulture) / 100;

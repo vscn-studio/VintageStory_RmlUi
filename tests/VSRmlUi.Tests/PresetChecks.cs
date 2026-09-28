@@ -113,7 +113,7 @@ static class PresetChecks
         preview(page, "date-picker-september");
         picker.MoveMonth(1);
         preview(page, "date-picker-october");
-        picker.Select(new DateOnly(2026, 10, 15));
+        page.Root.QuerySelector(".vs-date-day[data-date='2026-10-15']")!.DispatchEvent("click");
         check(picker.Selected == new DateOnly(2026, 10, 15) && page.GetElementById("calendar-grid")!.InnerRml.Contains("2026-10-15"), "date picker changes month and selected day");
         picker.Unbind();
     }
