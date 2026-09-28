@@ -30,5 +30,6 @@ The test writes PNG files under `artifacts/previews/`. This directory is generat
 | MIDI / OSC monitor | `midi-osc-midi.png`, `midi-osc-osc.png` |
 | VR UI plane | `vr-plane.png` |
 | Date picker | `date-picker-september.png`, `date-picker-october.png` |
+| 3D orientation | `orientation-front.png`, `orientation-rotated.png` |
 
 `<variant>` is `default`, `night`, `day`, or `contrast`. The folder previews use a static folder list fixture with the same RML structure and styles as the runtime dialog; no filesystem contents are included.

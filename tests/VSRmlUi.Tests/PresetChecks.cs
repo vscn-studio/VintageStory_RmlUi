@@ -117,4 +117,17 @@ static class PresetChecks
         check(picker.Selected == new DateOnly(2026, 10, 15) && page.GetElementById("calendar-grid")!.InnerRml.Contains("2026-10-15"), "date picker changes month and selected day");
         picker.Unbind();
     }
+
+    internal static void Orientation(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        var widget = new RmlOrientationWidget("axes");
+        using var page = Page(ui, "orientation", "3D orientation", widget.Markup());
+        widget.Bind(page);
+        preview(page, "orientation-front");
+        string before = page.GetElementById("axes-axes")!.InnerRml;
+        widget.Set(page, 1.1f, -0.45f);
+        preview(page, "orientation-rotated");
+        check(before != page.GetElementById("axes-axes")!.InnerRml && page.GetElementById("axes")!.GetAttribute("aria-label").Contains("yaw 1.1"), "3D orientation projects axes after rotation");
+        widget.Unbind();
+    }
 }
