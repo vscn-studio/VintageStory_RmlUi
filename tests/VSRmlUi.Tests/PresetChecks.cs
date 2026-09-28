@@ -62,4 +62,17 @@ static class PresetChecks
         preview(page, "knob-high");
         check(before != page.GetElementById("volume-ring")!.InnerRml && page.GetElementById("volume")!.GetAttribute("aria-valuenow") == "82", "knob arc and value respond to volume");
     }
+
+    internal static void Switch(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        using var page = Page(ui, "switch", "Switch", RmlSwitch.Markup("enabled"));
+        preview(page, "switch-off");
+        var left = page.QuerySelector(".vs-switch-thumb")!.Bounds.X;
+        bool changed = false;
+        using var binding = RmlSwitch.Bind(page, "enabled", value => changed = value);
+        page.GetElementById("enabled")!.DispatchEvent("click");
+        Thread.Sleep(220);
+        preview(page, "switch-on");
+        check(changed && page.GetElementById("enabled")!.GetAttribute("aria-checked") == "true" && page.QuerySelector(".vs-switch-thumb")!.Bounds.X > left, "switch click updates state, callback and thumb position");
+    }
 }

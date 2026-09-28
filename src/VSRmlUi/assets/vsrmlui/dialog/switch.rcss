@@ -1,0 +1,7 @@
+button.vs-switch { position: relative; display: inline-block; width: 50dp; min-width: 50dp; height: 28dp; padding: 0dp; background-color: #4c5451; border: 1dp #7a8981; border-radius: 14dp; }
+button.vs-switch:hover { background-color: #5e6862; }
+button.vs-switch.on { background-color: #168c75; border-color: #36bd9e; }
+button.vs-switch .vs-switch-thumb { position: absolute; display: block; top: 3dp; left: 3dp; width: 20dp; height: 20dp; background-color: #ffffff; border-radius: 10dp; transition: left 0.16s cubic-out; }
+button.vs-switch.on span.vs-switch-thumb { left: 25dp; }
+.vs-theme-day button.vs-switch { background-color: #b8c1ba; border-color: #87978b; }
+.vs-theme-day button.vs-switch.on { background-color: #147963; border-color: #147963; }
