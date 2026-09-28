@@ -8,6 +8,19 @@ public static class RmlControls
     public static string Slider(string id, double value, double min, double max, double step = 1)
         => $"<input id='{E(id)}' class='range' type='range' min='{N(min)}' max='{N(max)}' step='{N(step)}' value='{N(value)}'/>";
 
+    /// <summary>Creates the alternate slider preset with its value overlaid in the slot.</summary>
+    public static string SliderWithValue(string id, double value, double min, double max, double step = 1)
+        => $"<div class='vs-slider-value'>{Slider(id, value, min, max, step)}<span id='{E(id)}-value' class='vs-slider-value-text'>{N(value)}</span></div>";
+
+    /// <summary>Keeps a slider preset's centered value label synchronized with its change events.</summary>
+    public static IDisposable BindSliderValue(RmlDocument document, string id)
+    {
+        var slider = document.GetElementById(id) ?? throw new ArgumentException($"Slider '{id}' was not found.", nameof(id));
+        var display = document.GetElementById(id + "-value") ?? throw new ArgumentException($"Slider value label for '{id}' was not found.", nameof(id));
+        display.Text = slider.Value;
+        return slider.On("change", e => display.Text = string.IsNullOrEmpty(e.Value) ? slider.Value : e.Value);
+    }
+
     public static string ColorPicker(string id, string value)
     {
         if (!TryParseColor(value, out uint rgba)) rgba = 0xffffffff;

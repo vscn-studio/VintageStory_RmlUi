@@ -35,7 +35,7 @@
       <div class="vs-inspector">
         <div class="vs-section-title">[[vsrmluiexample:inspector]]</div>
         <div class="vs-field"><label for="theme">[[vsrmluiexample:theme]]</label><select id="theme"><option value="default">[[vsrmluiexample:graphite]]</option><option value="night">[[vsrmluiexample:night]]</option><option value="day">[[vsrmluiexample:day]]</option><option value="contrast">[[vsrmluiexample:contrast]]</option></select></div>
-        <div class="vs-field"><label for="volume">[[vsrmluiexample:volume]] <span id="volume-value">50</span></label><input id="volume" class="range" type="range" min="0" max="100" step="1" value="50" /></div>
+        <div class="vs-field"><label for="volume">[[vsrmluiexample:volume]]</label><div class="vs-slider-value"><input id="volume" class="range" type="range" min="0" max="100" step="1" value="50" /><span id="volume-value" class="vs-slider-value-text">50</span></div></div>
         <div class="vs-row"><input id="show-hud" class="checkbox" type="checkbox" /><label for="show-hud">[[vsrmluiexample:hud]]</label></div>
         <div id="status" class="vs-hint"></div>
       </div>

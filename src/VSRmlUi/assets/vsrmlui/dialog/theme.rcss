@@ -43,7 +43,8 @@ em { font-style: italic; }
 .vs-list-item { display: block; min-height: 30dp; box-sizing: border-box; padding: 6dp 9dp; cursor: pointer; }
 .vs-list-item:hover { background-color: #333333; }
 .vs-list-item.active { background-color: #125eaa; color: #ffffff; }
-button, input, select, textarea { box-sizing: border-box; font-family: vsrmlui-default; font-size: 14dp; color: #ededed; }
+button, input, select, textarea { box-sizing: border-box; font-family: vsrmlui-default; font-size: 14dp; line-height: 20dp; color: #ededed; }
+label, select selectvalue { line-height: 20dp; }
 button { display: inline-block; vertical-align: middle; height: 30dp; min-width: 30dp; padding: 0dp 10dp; line-height: 30dp; white-space: nowrap; background-color: #424242; border-width: 0dp; border-radius: 0dp; cursor: pointer; text-align: center; tab-index: auto; }
 button:hover { background-color: #535353; }
 button:active { background-color: #343434; }
@@ -64,17 +65,23 @@ input.text, textarea, select { display: inline-block; padding: 4dp 7dp; backgrou
 input.text { width: 220dp; height: 30dp; cursor: text; }
 textarea { display: block; width: 100%; height: 88dp; cursor: text; }
 selection { background-color: #0879df; color: #ffffff; }
-input.checkbox { width: 16dp; height: 16dp; background-color: #111111; border: 1dp #858585; border-radius: 0dp; cursor: pointer; }
-input.checkbox:checked { background-color: #168cf2; border-color: #168cf2; }
+input.checkbox { width: 24dp; height: 24dp; background-color: transparent; border: 1dp #858585; border-radius: 0dp; cursor: pointer; }
+input.checkbox:checked { background-color: transparent; border-color: #168cf2; image-color: #ffffff; decorator: svg(vsrmlui:icons/tabler/check.svg); }
 select { width: 180dp; height: 30dp; }
-select selectarrow { width: 20dp; background-color: #353535; }
+select selectarrow { width: 20dp; background-color: transparent; image-color: #ededed; decorator: svg(vsrmlui:icons/tabler/chevron-down.svg); }
 select selectbox { background-color: #292929; border: 1dp #626262; padding: 3dp; }
 select option { display: block; padding: 6dp 8dp; }
 select option:hover, select option:checked { background-color: #125eaa; }
 input.range { width: 210dp; height: 30dp; }
-input.range slidertrack { height: 4dp; margin-top: 13dp; background-color: #646464; }
+/* ImGui-style range: a deep rectangular slot with the original grabber retained. */
+input.range slidertrack { height: 24dp; margin-top: 3dp; box-sizing: border-box; background-color: #151515; border: 1dp #555555; border-radius: 0dp; }
 input.range sliderbar { width: 12dp; height: 20dp; margin-top: 5dp; background-color: #168cf2; border-radius: 0dp; }
+input.range sliderbar:hover, input.range sliderbar:active, input.range sliderbar:focus { background-color: #5bb3ff; }
 input.range sliderarrowdec, input.range sliderarrowinc { display: none; }
+.vs-slider-value { position: relative; display: inline-block; width: 210dp; height: 30dp; }
+.vs-slider-value input.range { width: 100%; }
+.vs-slider-value-text { position: absolute; display: block; width: 100%; height: 30dp; line-height: 30dp; text-align: center; top: 0dp; left: 0dp; font-weight: bold; color: #ffffff; pointer-events: none; }
+.vs-slider-value input.range sliderbar { opacity: 0.55; }
 .color-picker { display: flex; align-items: center; }
 .color-swatch { width: 28dp; height: 28dp; margin-right: 6dp; border: 1dp #777777; border-radius: 0dp; }
 .color-value, .time-picker { min-width: 120dp; }
@@ -96,9 +103,14 @@ scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc, scrollbarhor
 .vs-theme-night button.vs-ghost, .vs-theme-night button.vs-icon-button, .vs-theme-night button.vs-window-control, .vs-theme-night .vs-nav-item { background-color: transparent; }
 .vs-theme-night .vs-tabs button { background-color: #282828; border-color: transparent; }
 .vs-theme-night .vs-tabs button.active { background-color: #0f0f0f; border-color: #434343; }
-.vs-theme-night input.text, .vs-theme-night textarea, .vs-theme-night select, .vs-theme-night input.checkbox { background-color: #080808; border-color: #777777; }
+.vs-theme-night input.text, .vs-theme-night textarea, .vs-theme-night select { background-color: #080808; border-color: #777777; }
+.vs-theme-night input.checkbox { border-color: #777777; }
 .vs-theme-night select selectbox { background-color: #1b1b1b; }
-.vs-theme-night input.range sliderbar, .vs-theme-night input.checkbox:checked { background-color: #2a9bff; }
+.vs-theme-night input.range sliderbar { background-color: #2a9bff; }
+.vs-theme-night input.checkbox:checked { border-color: #2a9bff; image-color: #ffffff; decorator: svg(vsrmlui:icons/tabler/check.svg); }
+.vs-theme-night select selectarrow { image-color: #ededed; }
+.vs-theme-night input.range slidertrack { background-color: #090909; border-color: #4d4d4d; }
+.vs-theme-night .vs-slider-value-text { color: #ffffff; }
 
 .vs-window.vs-theme-day { background-color: #eeeae2; border-color: #a99d8d; color: #29251f; }
 .vs-theme-day .vs-titlebar, .vs-theme-day .vs-statusbar, .vs-theme-day .vs-tabs, .vs-theme-day .vs-actions { background-color: #ded8cc; border-color: #b8aa97; color: #29251f; }
@@ -113,11 +125,15 @@ scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc, scrollbarhor
 .vs-theme-day button.vs-icon-button:hover, .vs-theme-day button.vs-window-control:hover, .vs-theme-day .vs-nav-item:hover { background-color: #cfc4b4; }
 .vs-theme-day .vs-tabs button { background-color: #cec6b9; border-color: transparent; color: #554839; }
 .vs-theme-day .vs-tabs button.active { background-color: #f6f3ed; border-color: #b8aa97; color: #29251f; }
-.vs-theme-day input.text, .vs-theme-day textarea, .vs-theme-day select, .vs-theme-day input.checkbox { background-color: #ffffff; border-color: #a99d8d; color: #29251f; }
+.vs-theme-day input.text, .vs-theme-day textarea, .vs-theme-day select { background-color: #ffffff; border-color: #a99d8d; color: #29251f; }
+.vs-theme-day input.checkbox { border-color: #a99d8d; }
 .vs-theme-day select selectbox { background-color: #f6f3ed; }
 .vs-theme-day select option:hover, .vs-theme-day select option:checked { background-color: #c89962; }
-.vs-theme-day input.range sliderbar, .vs-theme-day input.checkbox:checked { background-color: #aa671e; border-color: #aa671e; }
-.vs-theme-day input.range slidertrack { background-color: #aa9f90; }
+.vs-theme-day input.range sliderbar { background-color: #aa671e; }
+.vs-theme-day input.checkbox:checked { border-color: #aa671e; image-color: #29251f; decorator: svg(vsrmlui:icons/tabler/check.svg); }
+.vs-theme-day select selectarrow { image-color: #29251f; }
+.vs-theme-day input.range slidertrack { background-color: #d5cec2; border-color: #aa9f90; }
+.vs-theme-day .vs-slider-value-text { color: #000000; }
 .vs-theme-day scrollbarvertical slidertrack, .vs-theme-day scrollbarhorizontal slidertrack { background-color: #ddd6cb; }
 .vs-theme-day scrollbarvertical sliderbar, .vs-theme-day scrollbarhorizontal sliderbar { background-color: #998d7f; }
 
@@ -130,9 +146,14 @@ scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc, scrollbarhor
 .vs-theme-contrast button.vs-ghost, .vs-theme-contrast button.vs-icon-button, .vs-theme-contrast button.vs-window-control, .vs-theme-contrast .vs-nav-item { background-color: transparent; }
 .vs-theme-contrast .vs-tabs button { background-color: #343434; border-color: transparent; color: #ffffff; }
 .vs-theme-contrast .vs-tabs button.active { background-color: #050505; border-color: #d5d5d5; }
-.vs-theme-contrast input.text, .vs-theme-contrast textarea, .vs-theme-contrast select, .vs-theme-contrast input.checkbox { background-color: #050505; border-color: #ffffff; color: #ffffff; }
+.vs-theme-contrast input.text, .vs-theme-contrast textarea, .vs-theme-contrast select { background-color: #050505; border-color: #ffffff; color: #ffffff; }
+.vs-theme-contrast input.checkbox { border-color: #ffffff; }
 .vs-theme-contrast select selectbox { background-color: #141414; }
-.vs-theme-contrast input.range sliderbar, .vs-theme-contrast input.checkbox:checked { background-color: #f2bd46; border-color: #f2bd46; }
+.vs-theme-contrast input.range sliderbar { background-color: #f2bd46; }
+.vs-theme-contrast input.checkbox:checked { border-color: #f2bd46; image-color: #ffffff; decorator: svg(vsrmlui:icons/tabler/check.svg); }
+.vs-theme-contrast select selectarrow { image-color: #ffffff; }
+.vs-theme-contrast input.range slidertrack { background-color: #111111; border-color: #ffffff; }
+.vs-theme-contrast .vs-slider-value-text { color: #000000; }
 
 /* Explicit interaction rules win over variant surface colors. */
 .vs-window button.vs-icon-button:hover, .vs-window button.vs-window-control:hover, .vs-window button.vs-ghost:hover { background-color: #454545; }
@@ -144,6 +165,6 @@ scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc, scrollbarhor
 .vs-window.vs-theme-day .vs-nav-item.active:hover { background-color: #965519; }
 .vs-window.vs-theme-contrast .vs-nav-item.active:hover { background-color: #f2bd46; }
 .vs-window button:disabled { background-color: #303030; color: #8b8b8b; }
-.vs-window input.checkbox:checked { background-color: #168cf2; }
-.vs-window.vs-theme-day input.checkbox:checked { background-color: #aa671e; }
-.vs-window.vs-theme-contrast input.checkbox:checked { background-color: #f2bd46; }
+.vs-window input.checkbox:checked { border-color: #168cf2; }
+.vs-window.vs-theme-day input.checkbox:checked { border-color: #aa671e; }
+.vs-window.vs-theme-contrast input.checkbox:checked { border-color: #f2bd46; }
