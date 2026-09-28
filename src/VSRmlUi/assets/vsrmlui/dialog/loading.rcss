@@ -1,0 +1,12 @@
+.vs-loading { position: relative; width: 40dp; height: 40dp; }
+.load-square { position: absolute; display: block; width: 16dp; height: 16dp; background-color: #39bfa6; opacity: 0; animation: 1s linear infinite square-flash; }
+.q0 { top: 2dp; left: 2dp; }
+.q1 { top: 2dp; left: 22dp; animation: 1s 0.25s linear infinite square-flash; }
+.q2 { top: 22dp; left: 22dp; animation: 1s 0.5s linear infinite square-flash; }
+.q3 { top: 22dp; left: 2dp; animation: 1s 0.75s linear infinite square-flash; }
+@keyframes square-flash { from { opacity: 1; } 24% { opacity: 1; } 25% { opacity: 0; } to { opacity: 0; } }
+.load-ring { width: 32dp; height: 32dp; border: 4dp #3b3b3b; border-top-color: #39bfa6; border-right-color: #39bfa6; border-radius: 20dp; animation: 1s linear infinite ring-spin; }
+@keyframes ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.vs-loading.line { width: 220dp; height: 4dp; background-color: #3b3b3b; overflow: hidden; }
+.load-line { position: absolute; width: 55dp; height: 4dp; background-color: #39bfa6; animation: 1s cubic-in-out infinite alternate line-travel; }
+@keyframes line-travel { from { left: 0dp; } to { left: 165dp; } }
