@@ -18,4 +18,19 @@ static class PresetChecks
         preview(page, "loading-frame-2");
         check(!first.SequenceEqual(pixels()), "loading presets animate across rendered frames");
     }
+
+    internal static void ClickFeedback(RmlRuntime ui, Action<RmlDocument, string> preview, Action<bool, string> check)
+    {
+        using var page = Page(ui, "theme", "Click feedback", "<div class='demo-row'><button id='action' class='vs-primary'>Apply</button><input id='toggle' class='checkbox' type='checkbox'/></div>");
+        preview(page, "feedback-rest");
+        var button = page.GetElementById("action")!.Bounds;
+        page.Call(5, (int)(button.X + button.Width / 2), (int)(button.Y + button.Height / 2));
+        page.Call(6, (int)(button.X + button.Width / 2), (int)(button.Y + button.Height / 2));
+        preview(page, "feedback-pressed");
+        page.Call(7, (int)(button.X + button.Width / 2), (int)(button.Y + button.Height / 2));
+        var checkbox = page.GetElementById("toggle")!;
+        checkbox.SetAttribute("checked", "checked");
+        preview(page, "feedback-checked");
+        check(page.QuerySelector("input:checked") is not null && checkbox.Bounds.Width == 24, "checkbox feedback keeps selected state and stable layout");
+    }
 }

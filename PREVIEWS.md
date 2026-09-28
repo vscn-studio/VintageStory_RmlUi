@@ -23,5 +23,6 @@ The test writes PNG files under `artifacts/previews/`. This directory is generat
 | Pitch curve | `pitch-curve-low.png`, `pitch-curve-high.png` |
 | Audio analysis | `audio-analysis-waveform.png`, `audio-analysis-frequency.png`, `audio-analysis-spectrogram.png` |
 | Loading animations | `loading-frame-1.png`, `loading-frame-2.png` |
+| Click feedback | `feedback-rest.png`, `feedback-pressed.png`, `feedback-checked.png` |
 
 `<variant>` is `default`, `night`, `day`, or `contrast`. The folder previews use a static folder list fixture with the same RML structure and styles as the runtime dialog; no filesystem contents are included.
