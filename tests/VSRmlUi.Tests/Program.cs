@@ -199,6 +199,16 @@ if (!args.Contains("--headless"))
             Preview(audioBars, "audio-bars-high");
             Check(audioBars.GetElementById("meter-bar-2")!.Bounds.Height > low && audioBars.GetElementById("meter")!.GetAttribute("aria-valuenow") == "0.9", "audio bars respond to level and expose meter value");
         }
+        using (var pitchCurve = ui.LoadDocumentFromString("vsrmlui", "<rml><head><link type='text/rcss' href='vsrmlui:dialog/theme.rcss'/><link type='text/rcss' href='vsrmlui:dialog/pitch-curve.rcss'/><style>body { padding: 60dp; background-color: #202020; }</style></head><body><h2>Pitch curve</h2>" + RmlControls.PitchCurve("pitch") + "</body></rml>", "vsrmlui:dialog/pitch-curve-preview.rml"))
+        {
+            pitchCurve.Show();
+            RmlControls.SetPitchCurve(pitchCurve, "pitch", 180, 0.75);
+            Preview(pitchCurve, "pitch-curve-low");
+            string low = pitchCurve.GetElementById("pitch")!.InnerRml;
+            RmlControls.SetPitchCurve(pitchCurve, "pitch", 880, 0.75);
+            Preview(pitchCurve, "pitch-curve-high");
+            Check(pitchCurve.GetElementById("pitch")!.InnerRml != low && pitchCurve.GetElementById("pitch")!.GetAttribute("aria-label") == "880 Hz", "pitch curve changes frequency and accessible label");
+        }
         foreach (string name in new[] { "night", "day", "contrast" })
             document.GetElementById("panel")!.SetClass("vs-theme-" + name, false);
         document.GetElementById("theme")!.Value = "default";

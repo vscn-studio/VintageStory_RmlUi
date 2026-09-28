@@ -1,0 +1,3 @@
+.vs-pitch-curve { display: block; width: 480dp; height: 120dp; background-color: #151515; border: 1dp #555555; }
+.vs-theme-day .vs-pitch-curve { background-color: #e6e0d6; border-color: #aa9f90; }
+.vs-theme-contrast .vs-pitch-curve { background-color: #111111; border-color: #ffffff; }

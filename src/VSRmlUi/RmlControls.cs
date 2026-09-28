@@ -43,6 +43,27 @@ public static class RmlControls
         }
     }
 
+    public static string PitchCurve(string id)
+        => $"<svg id='{E(id)}' class='vs-pitch-curve' width='480' height='120' viewBox='0 0 480 120'><path d='M0 60 L480 60' fill='none' stroke='#2a9bff' stroke-width='3'/></svg>";
+
+    public static void SetPitchCurve(RmlDocument document, string id, double pitchHz, double amplitude, double phase = 0)
+    {
+        if (!double.IsFinite(pitchHz) || !double.IsFinite(amplitude) || !double.IsFinite(phase)) throw new ArgumentOutOfRangeException(nameof(pitchHz));
+        var curve = document.GetElementById(id) ?? throw new ArgumentException($"Pitch curve '{id}' was not found.", nameof(id));
+        double cycles = Math.Clamp(pitchHz / 80, 0.5, 16);
+        double height = 49 * Math.Clamp(amplitude, 0, 1);
+        var points = new System.Text.StringBuilder();
+        for (int i = 0; i <= 96; i++)
+        {
+            double x = i * 5;
+            double envelope = Math.Sin(Math.PI * i / 96);
+            double y = 60 - height * envelope * Math.Sin(2 * Math.PI * cycles * i / 96 + phase);
+            points.Append(i == 0 ? "M" : " L").Append(N(x)).Append(' ').Append(N(y));
+        }
+        curve.InnerRml = $"<path d='{points}' fill='none' stroke='#2a9bff' stroke-width='3'/>";
+        curve.SetAttribute("aria-label", N(pitchHz) + " Hz");
+    }
+
     public static string ColorPicker(string id, string value)
     {
         if (!TryParseColor(value, out uint rgba)) rgba = 0xffffffff;
